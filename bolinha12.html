@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Primeiro Projeto</title>
+    <style>
+        canvas {touch-action: none;}
+    </style>
+</head>
+<body>
+    <!-- A Estrutura (HTML) -->
+    <h1>Minha primeira página interativa</h1>
+    <p id="texto-mudanca">Clique no botão abaixo para mudar esta frase.</p>
+    <button onclick="alterarTexto()">Clique Aqui</button>
+	<button onclick="alterarTextoNovo()">Botao 2</button>
+    <canvas id="meuCanvas" width="375" height="300" style="border:1px solid black;"></canvas>
+    
+    <!-- A Ação (JavaScript) -->
+    <script>
+        const cores = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3','#FFFFFF'];
+        
+
+        function alterarTexto() {
+            // Encontra o parágrafo pelo seu ID e altera o texto
+            document.getElementById("texto-mudanca").innerHTML = "Você clicou no botão! O JavaScript funcionou!";
+            document.body.style.backgroundColor = cores[5];
+        }
+	   function alterarTextoNovo() {
+            // 3. Aplica a cor ao fundo da página
+            const corAleatoria = cores[Math.floor(Math.random() * cores.length)];
+            document.body.style.backgroundColor = corAleatoria;
+
+		if (navigator.vibrate) {
+            	navigator.vibrate(200);
+            }
+
+            // Encontra o parágrafo pelo seu ID e altera o texto
+            document.getElementById("texto-mudanca").innerHTML = "Clique no botão abaixo para mudar esta frase.";
+        }
+    </script>
+    <script>
+        const canvas = document.getElementById("meuCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let circuloX = 200;
+        let circuloY = 150;
+        function iniciarVelocidade() {
+            //let valor = 0.015;
+            let valor = 1;
+            return valor;
+        }
+        let velocidade = iniciarVelocidade();
+        //let tempo = 0;
+        let voltando = false;
+        let voltarL = false;
+        let cor = "blue";
+        let sorteou130 = false;
+        let trajetoGrande = false;
+
+        function sortearTrajeto() {
+            return Math.floor(Math.random() * 4)+1;
+        }
+        let trajeto = sortearTrajeto();
+
+        // etapa da animação
+        let etapa = 0;
+
+        function atualizar() {
+            /*if (velocidade < 1) {
+                velocidade+=0.015;
+            }*/
+
+            switch (trajeto) {
+                case 0:
+                    trajetoReto();
+                    break;
+                case 1:
+                    trajetoL(false);
+                    break;
+                case 2:
+                    trajetoVoltando();
+                    break;
+                case 3:
+                    trajetoL(true);
+                    break;
+                case 4:
+                    trajetoL(true, true);
+                    break;
+            }
+
+            if (circuloX >= 130 ) {
+                cor = "red";
+            }
+
+            if (circuloX <= 130 && cor == "red" ) {
+                cor = "blue";
+            }
+
+            if (circuloX >= 200 && cor == "red") {
+                cor = "blue";
+            }
+
+            function trajetoReto() {
+                circuloX += velocidade;
+                if (circuloX > 325) {
+                    reiniciar();
+                }
+            }
+
+            function trajetoL(valor, grande) {
+                voltarL = valor;
+                trajetoGrande=grande;
+
+                switch (etapa) {
+                case 0:
+                    // vai para direita
+                    circuloX += velocidade;
+
+                    // Se for o trajeto novo, vai até 325
+                    if (trajetoGrande) {
+                        if (circuloX >= 325) {
+                            etapa = 5;
+                        }
+                    } else {
+                        if (circuloX >= 275) {
+                            etapa = 1;
+                        }
+                    }
+                    break;
+                // volta de 325 para 275
+                case 5:
+                    circuloX -= velocidade;
+
+                    if (circuloX <= 275) {
+                        etapa = 1;
+                    }
+                    break;
+                case 1:
+                    // desce
+                    circuloY += velocidade;
+
+                    if (circuloY >= 250) {
+                        etapa = 2;
+                        velocidade = iniciarVelocidade();
+                    }
+                    break;
+                case 2:
+                    // sobe
+                    circuloY -= velocidade;
+
+                    if (circuloY <= 150) {
+                        circuloY=150;
+                        if (voltarL) {
+                            etapa = 3;
+                        } else {
+                            etapa = 4;
+                        }
+                    }
+                    break;
+                case 3:
+                    // volta para esquerda
+                    circuloX -= velocidade;
+
+                    if (circuloX <= 50) {
+                        reiniciar();
+                    }
+                    break;
+                case 4:
+                    circuloX += velocidade;
+
+                    if (circuloX >= 325) {
+                        etapa=3;
+                    }
+                    break;
+                }
+            }
+
+            
+
+            function trajetoVoltando() {
+                if (!voltando) {
+                    // vai até a direita
+                    circuloX += velocidade;
+
+                    if (circuloX >= 325) {
+                        voltando = true;
+                        velocidade = iniciarVelocidade();
+                    }
+                } else {
+                    // volta para a esquerda
+                    circuloX -= velocidade;
+
+                    if (circuloX <= 50) {
+                        voltando = false;
+                        reiniciar();
+                    }
+                }
+            }
+
+            function reiniciar() {
+                circuloX = 50;
+                circuloY = 150;
+                etapa = 0;
+                velocidade = iniciarVelocidade();
+                cor = "blue";
+                trajeto = sortearTrajeto();
+                voltarL=false;
+                sorteou130 = false;
+            }
+
+
+            /*if (circuloX >= 0 && circuloX <= 325 && circuloY >= 0 && circuloY <= 300) {
+                circuloX += 1;
+            }else{
+               circuloX =50; 
+            }*/
+
+            desenhar();
+            requestAnimationFrame(atualizar);
+        }
+
+        atualizar();
+
+        function desenhar() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            ctx.arc(circuloX, circuloY, 50, 0, 2 * Math.PI);
+            ctx.fillStyle = cor;
+            ctx.fill();
+            
+            // Painel de informações
+            ctx.font = "14px Arial";
+            ctx.fillStyle = "black";
+            ctx.textAlign = "right";
+
+            ctx.fillText("Velocidade: " + velocidade.toFixed(2), canvas.width - 10, 18);
+            ctx.fillText("Width X: " + circuloX.toFixed(0), canvas.width - 10, 32);
+            ctx.fillText("Height Y: " + circuloY.toFixed(0), canvas.width - 10, 46);
+            
+            let nomeTrajeto = "";
+            switch (trajeto) {
+                case 0:
+                    nomeTrajeto = "Reto";
+                    break;
+                case 1:
+                    nomeTrajeto = "L direita";
+                    break;
+                case 2:
+                    nomeTrajeto = "Ida e volta";
+                    break;
+                case 3:
+                    nomeTrajeto = "L com volta";
+                    break;
+                case 4:
+                    nomeTrajeto = "Grande";
+                    break;
+            }
+            ctx.fillText("Trajeto " + trajeto +": "+ nomeTrajeto, canvas.width - 10, 60);
+            ctx.fillText("VoltarL: " + voltarL, canvas.width - 10, 74);
+            ctx.fillText("Voltando: " + voltando, canvas.width - 10, 88);
+            ctx.fillText("Cor: " + cor, canvas.width - 10, 102);
+        }
+
+        
+        let arrastando=false;
+        
+        canvas.addEventListener("pointerleave", function() {
+            arrastando = false;
+        });
+
+        canvas.addEventListener("pointerdown", function(event) {
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            const dx = x - 200; // centro X do círculo
+            const dy = y - 150; // centro Y do círculo
+
+            if (dx * dx + dy * dy <= 50 * 50) {
+                //alert("Círculo clicado!");
+                arrastando=true;
+                //alert(arrastando)
+            }
+        });
+
+        canvas.addEventListener("pointermove", function(event) {
+            if (arrastando) {
+                circuloX = event.offsetX;
+                circuloY = event.offsetY;
+               // alert(".");
+                desenhar();
+               // alert("..");
+            }
+        });
+
+        canvas.addEventListener("pointerup", function() {
+            arrastando = false;
+            //alert(arrastando)
+        });
+    </script>
+</body>
+</html>
