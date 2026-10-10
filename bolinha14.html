@@ -264,7 +264,9 @@
                		circuloY - circuloRaio <= obstaculo.y + obstaculo.altura)
                		{
                		parado = true;
-               		expandindo = true;
+
+               		setTimeout(() => { expandindo = true; }, 1500);
+
                	}
            	}
             
@@ -364,8 +366,7 @@
         });
     </script>
 </body>
-</html>         arrastando = false;
-            //alert(arrastando)
+</html>          //alert(arrastando)
         });
     </script>
 </body>
