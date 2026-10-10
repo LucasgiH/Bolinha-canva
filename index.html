@@ -43,7 +43,11 @@
         const canvas = document.getElementById("meuCanvas");
         const ctx = canvas.getContext("2d");
 
-        let circuloX = 200;
+		let circuloRaio = 50;
+		let expandindo = false;
+		let velocidadeExpansao = 0.08;
+		let raioMaximo = 70;
+        let circuloX = 50;
         let circuloY = 150;
         function iniciarVelocidade() {
             //let valor = 0.015;
@@ -57,6 +61,14 @@
         let cor = "blue";
         let sorteou130 = false;
         let trajetoGrande = false;
+        
+        let parado = false;    
+        let obstaculo = {
+        	x: 210,
+        	y: 80,
+        	largura: 40,
+        	altura: 140
+        };
 
         function sortearTrajeto() {
             return Math.floor(Math.random() * 4)+1;
@@ -70,6 +82,22 @@
             /*if (velocidade < 1) {
                 velocidade+=0.015;
             }*/
+            /*if (parado) {
+            	desenhar();
+            	return;
+            }*/
+            if (parado) {
+            	if (expandindo) {
+            		circuloRaio += velocidadeExpansao;
+            		if (circuloRaio >= raioMaximo) {
+            			circuloRaio = raioMaximo;
+            			expandindo = false;
+            		}
+            	}
+            	desenhar();
+            	requestAnimationFrame(atualizar);
+            	return;
+            }
 
             switch (trajeto) {
                 case 0:
@@ -207,6 +235,9 @@
                 trajeto = sortearTrajeto();
                 voltarL=false;
                 sorteou130 = false;
+                parado = false;
+                circuloRaio = 50;
+                expandindo = false;
             }
 
 
@@ -215,7 +246,29 @@
             }else{
                circuloX =50; 
             }*/
-
+            
+            /*function verificarColisao() {
+            	if (circuloX + 50 >= obstaculo.x &&
+            	circuloX - 50 <= obstaculo.x + obstaculo.largura && 
+            	circuloY + 50 >= obstaculo.y && 
+            	circuloY - 50 <= obstaculo.y + obstaculo.altura
+            	) {
+            		//setTimeout(() => { parado = true; }, 2000); // volta para false após 2 segundos
+            		parado=true;
+            	}
+            }*/
+            function verificarColisao() {
+            	if (circuloX + circuloRaio >= obstaculo.x &&
+              		circuloX - circuloRaio <= obstaculo.x + obstaculo.largura &&
+               		circuloY + circuloRaio >= obstaculo.y &&
+               		circuloY - circuloRaio <= obstaculo.y + obstaculo.altura)
+               		{
+               		parado = true;
+               		expandindo = true;
+               	}
+           	}
+            
+            verificarColisao();
             desenhar();
             requestAnimationFrame(atualizar);
         }
@@ -224,9 +277,20 @@
 
         function desenhar() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            
+            // Obstáculo
+            ctx.fillStyle = "black";
+            ctx.fillRect(
+            	obstaculo.x,
+            	obstaculo.y,
+            	obstaculo.largura,
+            	obstaculo.altura
+            );
+            
+            //circulo
             ctx.beginPath();
-            ctx.arc(circuloX, circuloY, 50, 0, 2 * Math.PI);
+            //ctx.arc(circuloX, circuloY, 50, 0, 2 * Math.PI);
+            ctx.arc(circuloX, circuloY, circuloRaio, 0, 2 * Math.PI);
             ctx.fillStyle = cor;
             ctx.fill();
             
@@ -296,6 +360,11 @@
 
         canvas.addEventListener("pointerup", function() {
             arrastando = false;
+            //alert(arrastando)
+        });
+    </script>
+</body>
+</html>         arrastando = false;
             //alert(arrastando)
         });
     </script>
