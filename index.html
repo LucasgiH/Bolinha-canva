@@ -62,6 +62,7 @@
         let sorteou130 = false;
         let trajetoGrande = false;
         
+        let avancando = false;
         let parado = false;    
         let obstaculo = {
         	x: 210,
@@ -85,7 +86,7 @@
             /*if (parado) {
             	desenhar();
             	return;
-            }*/
+            }
             if (parado) {
             	if (expandindo) {
             		circuloRaio += velocidadeExpansao;
@@ -94,6 +95,31 @@
             			expandindo = false;
             		}
             	}
+            	desenhar();
+            	requestAnimationFrame(atualizar);
+            	return;
+            }*/
+            if (parado) {
+            	if (expandindo) {
+            		circuloRaio += velocidadeExpansao;
+           			if (circuloRaio >= raioMaximo) {
+            			circuloRaio = raioMaximo;
+            			expandindo = false;
+            			avancando = true;
+           				parado = false;
+           			}
+           		}
+            	desenhar();
+            	requestAnimationFrame(atualizar);
+            	return;
+            }
+            
+            if (avancando) {
+            	circuloX += velocidade;
+           		if (circuloX - 50 >= obstaculo.x + obstaculo.largura) {
+            		avancando = false;
+           			parado = true;
+           		}
             	desenhar();
             	requestAnimationFrame(atualizar);
             	return;
@@ -238,6 +264,7 @@
                 parado = false;
                 circuloRaio = 50;
                 expandindo = false;
+                avancando = false;
             }
 
 
@@ -366,4 +393,4 @@
         });
     </script>
 </body>
-</html>
+</html>          
