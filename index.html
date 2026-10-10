@@ -264,7 +264,9 @@
                		circuloY - circuloRaio <= obstaculo.y + obstaculo.altura)
                		{
                		parado = true;
-               		expandindo = true;
+
+               		setTimeout(() => { expandindo = true; }, 1500);
+
                	}
            	}
             
@@ -360,11 +362,6 @@
 
         canvas.addEventListener("pointerup", function() {
             arrastando = false;
-            //alert(arrastando)
-        });
-    </script>
-</body>
-</html>         arrastando = false;
             //alert(arrastando)
         });
     </script>
