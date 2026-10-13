@@ -43,12 +43,6 @@
         const canvas = document.getElementById("meuCanvas");
         const ctx = canvas.getContext("2d");
 
-		let circuloRaio = 50;
-		let expandindo = false;
-		let velocidadeExpansao = 0.08;
-		let raioMaximo = 70;
-        let circuloX = 50;
-        let circuloY = 150;
         function iniciarVelocidade() {
             //let valor = 0.015;
             let valor = 1;
@@ -62,6 +56,14 @@
         let sorteou130 = false;
         let trajetoGrande = false;
         
+        let circuloRaio = 50;
+		let expandindo = false;
+		let velocidadeExpansao = 0.08;
+		let raioMaximo = 70;
+        let circuloX = 50;
+        let circuloY = 150;
+        let implodindo = false;
+        let velocidadeImplosao = 0.08;
         let avancando = false;
         let parado = false;    
         let obstaculo = {
@@ -98,7 +100,7 @@
             	desenhar();
             	requestAnimationFrame(atualizar);
             	return;
-            }*/
+            }
             if (parado) {
             	if (expandindo) {
             		circuloRaio += velocidadeExpansao;
@@ -112,6 +114,30 @@
             	desenhar();
             	requestAnimationFrame(atualizar);
             	return;
+            }*/
+            if (parado) {
+                if (expandindo) {
+                    circuloRaio += velocidadeExpansao;
+                    if (circuloRaio >= raioMaximo) {
+                        circuloRaio = raioMaximo;
+                        expandindo = false;
+                        avancando = true;
+                        parado = false;
+                    }
+                }
+
+                if (implodindo) {
+                    circuloRaio -= velocidadeImplosao;
+
+                    if (circuloRaio <= 50) {
+                        circuloRaio = 50;
+                        implodindo = false;
+                    }
+                }
+
+                desenhar();
+                requestAnimationFrame(atualizar);
+                return;
             }
             
             if (avancando) {
@@ -119,6 +145,7 @@
            		if (circuloX - 50 >= obstaculo.x + obstaculo.largura) {
             		avancando = false;
            			parado = true;
+           			implodindo = true;
            		}
             	desenhar();
             	requestAnimationFrame(atualizar);
@@ -265,6 +292,7 @@
                 circuloRaio = 50;
                 expandindo = false;
                 avancando = false;
+                implodindo = false;
             }
 
 
