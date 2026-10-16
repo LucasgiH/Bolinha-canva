@@ -19,7 +19,7 @@
     <h2>Escolha as aberturas da casa</h2>
     <p id="mensagem">Clique perto de uma borda para criar a primeira abertura.</p>
 
-    <canvas id="meuCanvas" width="500" height="350"></canvas>
+    <canvas id="meuCanvas" width="500" height="400"></canvas>
 
     <script>
         const canvas = document.getElementById("meuCanvas");
@@ -33,8 +33,12 @@
             largura: 380,
             altura: 240
         };
+        const blocoLargura = casa.largura / 4;
+        const blocoAltura = casa.altura / 3;
 
         let aberturas = [];
+        let confirmado = false;
+        let mostrarBotao = false;
 
         function desenhar() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -72,6 +76,16 @@
                 }
 
                 ctx.stroke();
+            }
+            
+            if (mostrarBotao && !confirmado) {
+                ctx.fillStyle = "green";
+                ctx.fillRect(200, 325, 100, 45);
+                ctx.fillStyle = "white";
+                ctx.font = "18px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("OK", 250, 347);
             }
         }
 
@@ -130,9 +144,26 @@
                 }
             }
 
+            //return maisProxima;
+            // Encaixa a abertura na grade
+            if (maisProxima.lado === "superior" ||
+                maisProxima.lado === "inferior") {
+            
+                maisProxima.x = casa.x +
+                    Math.round((maisProxima.x - casa.x) / blocoLargura)
+                    * blocoLargura;
+            
+            } else {
+            
+                maisProxima.y = casa.y +
+                    Math.round((maisProxima.y - casa.y) / blocoAltura)
+                    * blocoAltura;
+            }
+            
             return maisProxima;
         }
-
+        
+        /*
         canvas.addEventListener("click", function(event) {
             const rect = canvas.getBoundingClientRect();
 
@@ -173,6 +204,66 @@
                 mensagem.textContent =
                     "Duas aberturas criadas. O próximo clique reiniciará tudo.";
             }
+        });*/
+        
+        canvas.addEventListener("click", function(event) {
+
+            // Se confirmou, nenhuma interação é permitida
+            if (confirmado) {
+                return;
+            }
+    
+            const rect = canvas.getBoundingClientRect();
+    
+            const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+    
+            const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+    
+            // Verifica se o clique foi no botão OK
+            if (mostrarBotao &&
+                x >= 200 && x <= 300 &&
+                y >= 325 && y <= 370) {
+    
+                confirmado = true;
+                mostrarBotao = false;
+    
+                mensagem.textContent = "Aberturas confirmadas! O desenho está bloqueado.";
+    
+                desenhar();
+                return;
+            }
+    
+            // Se já existem duas aberturas, reinicia tudo
+            if (aberturas.length === 2) {
+                aberturas = [];
+                mostrarBotao = false;
+    
+                desenhar();
+    
+                mensagem.textContent = "Aberturas apagadas! Escolha a primeira novamente.";
+    
+                return;
+            }
+    
+            // Descobre a borda mais próxima
+            const borda = verificarBorda(x, y);
+    
+            aberturas.push({
+                lado: borda.lado,
+                x: borda.x,
+                y: borda.y
+            });
+    
+            // O botão só aparece com duas aberturas
+            if (aberturas.length === 2) {
+                mostrarBotao = true;
+    
+                mensagem.textContent = "Duas aberturas criadas. Clique em OK para confirmar.";
+            } else {
+                mensagem.textContent = "Primeira abertura criada. Escolha a segunda.";
+            }
+    
+            desenhar();
         });
 
         desenhar();
