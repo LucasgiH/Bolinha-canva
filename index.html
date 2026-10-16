@@ -88,7 +88,7 @@
                 ctx.fillText("OK", 250, 347);
             }
         }
-
+        /*
         function verificarBorda(x, y) {
             const esquerda = casa.x;
             const direita = casa.x + casa.largura;
@@ -160,6 +160,85 @@
                     * blocoAltura;
             }
             
+            return maisProxima;
+        }
+        */
+        
+        function verificarBorda(x, y) {
+            const esquerda = casa.x;
+            const direita = casa.x + casa.largura;
+            const superior = casa.y;
+            const inferior = casa.y + casa.altura;
+        
+            const distancias = [
+                {
+                    lado: "superior",
+                    distancia: Math.abs(y - superior),
+                    x: Math.max(esquerda, Math.min(x, direita)),
+                    y: superior
+                },
+                {
+                    lado: "inferior",
+                    distancia: Math.abs(y - inferior),
+                    x: Math.max(esquerda, Math.min(x, direita)),
+                    y: inferior
+                },
+                {
+                    lado: "esquerda",
+                    distancia: Math.abs(x - esquerda),
+                    x: esquerda,
+                    y: Math.max(superior, Math.min(y, inferior))
+                },
+                {
+                    lado: "direita",
+                    distancia: Math.abs(x - direita),
+                    x: direita,
+                    y: Math.max(superior, Math.min(y, inferior))
+                }
+            ];
+        
+            let maisProxima = distancias[0];
+        
+            for (let i = 1; i < distancias.length; i++) {
+                if (distancias[i].distancia < maisProxima.distancia) {
+                    maisProxima = distancias[i];
+                }
+            }
+        
+            let coluna;
+            let linha;
+        
+            if (maisProxima.lado === "superior" ||
+                maisProxima.lado === "inferior") {
+        
+                coluna = Math.max(0, Math.min(3,
+                    Math.floor((x - casa.x) / blocoLargura)));
+        
+                linha = maisProxima.lado === "superior" ? 0 : 2;
+        
+                maisProxima.x = casa.x + coluna * blocoLargura
+                    + blocoLargura / 2;
+        
+                maisProxima.y = maisProxima.lado === "superior"
+                    ? casa.y
+                    : casa.y + casa.altura;
+        
+            } else {
+                linha = Math.max(0, Math.min(2,
+                    Math.floor((y - casa.y) / blocoAltura)));
+        
+                coluna = maisProxima.lado === "esquerda" ? 0 : 3;
+        
+                maisProxima.x = maisProxima.lado === "esquerda"
+                    ? casa.x
+                    : casa.x + casa.largura;
+        
+                maisProxima.y = casa.y + linha * blocoAltura
+                    + blocoAltura / 2;
+            }
+        
+            maisProxima.posicao = maisProxima.lado + "_" + String.fromCharCode(65 + coluna) + (linha + 1);
+        
             return maisProxima;
         }
         
@@ -244,14 +323,26 @@
     
                 return;
             }
-    
-            // Descobre a borda mais próxima
+
             const borda = verificarBorda(x, y);
-    
+            
+            // Impede duas aberturas na mesma posição
+            const jaExiste = aberturas.some(
+                abertura => abertura.posicao === borda.posicao
+            );
+            
+            if (jaExiste) {
+                mensagem.textContent =
+                    "Essa posição já está ocupada. Escolha outra abertura.";
+            
+                return;
+            }
+            
             aberturas.push({
                 lado: borda.lado,
                 x: borda.x,
-                y: borda.y
+                y: borda.y,
+                posicao: borda.posicao
             });
     
             // O botão só aparece com duas aberturas
