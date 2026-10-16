@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aberturas da casa</title>
+
+    <style>
+        canvas {
+            border: 1px solid #ccc;
+            max-width: 100%;
+            height: auto;
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Escolha as aberturas da casa</h2>
+    <p id="mensagem">Clique perto de uma borda para criar a primeira abertura.</p>
+
+    <canvas id="meuCanvas" width="500" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("meuCanvas");
+        const ctx = canvas.getContext("2d");
+        const mensagem = document.getElementById("mensagem");
+
+        // Perímetro da casa
+        const casa = {
+            x: 60,
+            y: 50,
+            largura: 380,
+            altura: 240
+        };
+        const blocoLargura = casa.largura / 4;
+        const blocoAltura = casa.altura / 3;
+
+        let aberturas = [];
+        let confirmado = false;
+        let mostrarBotao = false;
+
+        function desenhar() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Desenha o retângulo azul
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 6;
+
+            ctx.strokeRect(
+                casa.x,
+                casa.y,
+                casa.largura,
+                casa.altura
+            );
+
+            // Desenha as aberturas brancas
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 10;
+
+            for (let abertura of aberturas) {
+                ctx.beginPath();
+
+                switch (abertura.lado) {
+                    case "superior":
+                    case "inferior":
+                        ctx.moveTo(abertura.x - 18, abertura.y);
+                        ctx.lineTo(abertura.x + 18, abertura.y);
+                        break;
+
+                    case "esquerda":
+                    case "direita":
+                        ctx.moveTo(abertura.x, abertura.y - 18);
+                        ctx.lineTo(abertura.x, abertura.y + 18);
+                        break;
+                }
+
+                ctx.stroke();
+            }
+            
+            if (mostrarBotao && !confirmado) {
+                ctx.fillStyle = "green";
+                ctx.fillRect(200, 325, 100, 45);
+                ctx.fillStyle = "white";
+                ctx.font = "18px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("OK", 250, 347);
+            }
+        }
+        /*
+        function verificarBorda(x, y) {
+            const esquerda = casa.x;
+            const direita = casa.x + casa.largura;
+            const superior = casa.y;
+            const inferior = casa.y + casa.altura;
+
+            // Distâncias do clique até cada borda
+            const distancias = [
+                {
+                    lado: "superior",
+                    distancia: Math.hypot(
+                        x - Math.max(esquerda, Math.min(x, direita)),
+                        y - superior
+                    ),
+                    x: Math.max(esquerda, Math.min(x, direita)),
+                    y: superior
+                },
+                {
+                    lado: "inferior",
+                    distancia: Math.hypot(
+                        x - Math.max(esquerda, Math.min(x, direita)),
+                        y - inferior
+                    ),
+                    x: Math.max(esquerda, Math.min(x, direita)),
+                    y: inferior
+                },
+                {
+                    lado: "esquerda",
+                    distancia: Math.hypot(
+                        x - esquerda,
+                        y - Math.max(superior, Math.min(y, inferior))
+                    ),
+                    x: esquerda,
+                    y: Math.max(superior, Math.min(y, inferior))
+                },
+                {
+                    lado: "direita",
+                    distancia: Math.hypot(
+                        x - direita,
+                        y - Math.max(superior, Math.min(y, inferior))
+                    ),
+                    x: direita,
+                    y: Math.max(superior, Math.min(y, inferior))
+                }
+            ];
+
+            // Procura a borda mais próxima
+            let maisProxima = distancias[0];
+
+            for (let i = 1; i < distancias.length; i++) {
+                if (distancias[i].distancia < maisProxima.distancia) {
+                    maisProxima = distancias[i];
+                }
+            }
+
+            //return maisProxima;
+            // Encaixa a abertura na grade
+            if (maisProxima.lado === "superior" ||
+                maisProxima.lado === "inferior") {
+            
+                maisProxima.x = casa.x +
+                    Math.round((maisProxima.x - casa.x) / blocoLargura)
+                    * blocoLargura;
+            
+            } else {
+            
+                maisProxima.y = casa.y +
+                    Math.round((maisProxima.y - casa.y) / blocoAltura)
+                    * blocoAltura;
+            }
+            
+            return maisProxima;
+        }
+        */
+        
+        function verificarBorda(x, y) {
+            const esquerda = casa.x;
+            const direita = casa.x + casa.largura;
+            const superior = casa.y;
+            const inferior = casa.y + casa.altura;
+        
+            const distancias = [
+                {
+                    lado: "superior",
+                    distancia: Math.abs(y - superior),
+                    x: Math.max(esquerda, Math.min(x, direita)),
+                    y: superior
+                },
+                {
+                    lado: "inferior",
+                    distancia: Math.abs(y - inferior),
+                    x: Math.max(esquerda, Math.min(x, direita)),
+                    y: inferior
+                },
+                {
+                    lado: "esquerda",
+                    distancia: Math.abs(x - esquerda),
+                    x: esquerda,
+                    y: Math.max(superior, Math.min(y, inferior))
+                },
+                {
+                    lado: "direita",
+                    distancia: Math.abs(x - direita),
+                    x: direita,
+                    y: Math.max(superior, Math.min(y, inferior))
+                }
+            ];
+        
+            let maisProxima = distancias[0];
+        
+            for (let i = 1; i < distancias.length; i++) {
+                if (distancias[i].distancia < maisProxima.distancia) {
+                    maisProxima = distancias[i];
+                }
+            }
+        
+            let coluna;
+            let linha;
+        
+            if (maisProxima.lado === "superior" ||
+                maisProxima.lado === "inferior") {
+        
+                coluna = Math.max(0, Math.min(3,
+                    Math.floor((x - casa.x) / blocoLargura)));
+        
+                linha = maisProxima.lado === "superior" ? 0 : 2;
+        
+                maisProxima.x = casa.x + coluna * blocoLargura
+                    + blocoLargura / 2;
+        
+                maisProxima.y = maisProxima.lado === "superior"
+                    ? casa.y
+                    : casa.y + casa.altura;
+        
+            } else {
+                linha = Math.max(0, Math.min(2,
+                    Math.floor((y - casa.y) / blocoAltura)));
+        
+                coluna = maisProxima.lado === "esquerda" ? 0 : 3;
+        
+                maisProxima.x = maisProxima.lado === "esquerda"
+                    ? casa.x
+                    : casa.x + casa.largura;
+        
+                maisProxima.y = casa.y + linha * blocoAltura
+                    + blocoAltura / 2;
+            }
+        
+            maisProxima.posicao = maisProxima.lado + "_" + String.fromCharCode(65 + coluna) + (linha + 1);
+        
+            return maisProxima;
+        }
+        
+        /*
+        canvas.addEventListener("click", function(event) {
+            const rect = canvas.getBoundingClientRect();
+
+            // Converte o clique para as coordenadas do Canvas
+            const x = (event.clientX - rect.left) *
+                      (canvas.width / rect.width);
+
+            const y = (event.clientY - rect.top) *
+                      (canvas.height / rect.height);
+
+            // Se já existem duas aberturas, reinicia
+            if (aberturas.length === 2) {
+                aberturas = [];
+                desenhar();
+
+                mensagem.textContent =
+                    "Aberturas apagadas! Clique para criar a primeira.";
+
+                return;
+            }
+
+            // Descobre a borda mais próxima do clique
+            const borda = verificarBorda(x, y);
+
+            // Guarda a posição escolhida pelo usuário
+            aberturas.push({
+                lado: borda.lado,
+                x: borda.x,
+                y: borda.y
+            });
+
+            desenhar();
+
+            if (aberturas.length === 1) {
+                mensagem.textContent =
+                    "Primeira abertura criada. Escolha a segunda.";
+            } else {
+                mensagem.textContent =
+                    "Duas aberturas criadas. O próximo clique reiniciará tudo.";
+            }
+        });*/
+        
+        canvas.addEventListener("click", function(event) {
+
+            // Se confirmou, nenhuma interação é permitida
+            if (confirmado) {
+                return;
+            }
+    
+            const rect = canvas.getBoundingClientRect();
+    
+            const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+    
+            const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+    
+            // Verifica se o clique foi no botão OK
+            if (mostrarBotao &&
+                x >= 200 && x <= 300 &&
+                y >= 325 && y <= 370) {
+    
+                confirmado = true;
+                mostrarBotao = false;
+    
+                mensagem.textContent = "Aberturas confirmadas! O desenho está bloqueado.";
+    
+                desenhar();
+                return;
+            }
+    
+            // Se já existem duas aberturas, reinicia tudo
+            if (aberturas.length === 2) {
+                aberturas = [];
+                mostrarBotao = false;
+    
+                desenhar();
+    
+                mensagem.textContent = "Aberturas apagadas! Escolha a primeira novamente.";
+    
+                return;
+            }
+
+            const borda = verificarBorda(x, y);
+            
+            // Impede duas aberturas na mesma posição
+            const jaExiste = aberturas.some(
+                abertura => abertura.posicao === borda.posicao
+            );
+            
+            if (jaExiste) {
+                mensagem.textContent =
+                    "Essa posição já está ocupada. Escolha outra abertura.";
+            
+                return;
+            }
+            
+            aberturas.push({
+                lado: borda.lado,
+                x: borda.x,
+                y: borda.y,
+                posicao: borda.posicao
+            });
+    
+            // O botão só aparece com duas aberturas
+            if (aberturas.length === 2) {
+                mostrarBotao = true;
+    
+                mensagem.textContent = "Duas aberturas criadas. Clique em OK para confirmar.";
+            } else {
+                mensagem.textContent = "Primeira abertura criada. Escolha a segunda.";
+            }
+    
+            desenhar();
+        });
+
+        desenhar();
+    </script>
+
+</body>
+</html>
