@@ -17,7 +17,9 @@
 <body>
 
     <h2>Escolha as aberturas da casa</h2>
-    <p id="mensagem">Clique perto de uma borda para criar a primeira abertura.</p>
+    <p id="mensagem">
+        Clique perto de uma borda para criar a primeira abertura.
+    </p>
 
     <canvas id="meuCanvas" width="500" height="400"></canvas>
 
@@ -26,24 +28,212 @@
         const ctx = canvas.getContext("2d");
         const mensagem = document.getElementById("mensagem");
 
-        // Perímetro da casa
+        // Dimensões da casa
         const casa = {
             x: 60,
             y: 50,
             largura: 380,
             altura: 240
         };
+
+        // Medidas de cada bloco
         const blocoLargura = casa.largura / 4;
         const blocoAltura = casa.altura / 3;
 
+        // Cores das linhas
+        const azulEscuro = "#003399";
+        const azulClaro = "lightblue";
+
+        // Estado do programa
         let aberturas = [];
         let confirmado = false;
         let mostrarBotao = false;
 
-        function desenhar() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Sorteia a cor inicial de cada linha
+        function sortearCorInicial() {
+            return Math.random() < 0.5
+                ? azulEscuro
+                : azulClaro;
+        }
 
-            // Desenha o retângulo azul
+        // Cria uma linha interativa
+        function criarLinha(x1, y1, x2, y2) {
+            return {
+                x1,
+                y1,
+                x2,
+                y2,
+                cor: sortearCorInicial()
+            };
+        }
+
+        // =========================================
+        // CRIAÇÃO DAS 17 LINHAS INTERATIVAS
+        // =========================================
+
+        // Bloco 1
+        const linhaInferiorBloco1 = criarLinha(
+            casa.x,
+            casa.y + blocoAltura,
+            casa.x + blocoLargura,
+            casa.y + blocoAltura
+        );
+
+        const linhaDireitaBloco1 = criarLinha(
+            casa.x + blocoLargura,
+            casa.y,
+            casa.x + blocoLargura,
+            casa.y + blocoAltura
+        );
+
+        // Bloco 2
+        const linhaInferiorBloco2 = criarLinha(
+            casa.x + blocoLargura,
+            casa.y + blocoAltura,
+            casa.x + 2 * blocoLargura,
+            casa.y + blocoAltura
+        );
+
+        const linhaDireitaBloco2 = criarLinha(
+            casa.x + 2 * blocoLargura,
+            casa.y,
+            casa.x + 2 * blocoLargura,
+            casa.y + blocoAltura
+        );
+
+        // Bloco 3
+        const linhaInferiorBloco3 = criarLinha(
+            casa.x + 2 * blocoLargura,
+            casa.y + blocoAltura,
+            casa.x + 3 * blocoLargura,
+            casa.y + blocoAltura
+        );
+
+        const linhaDireitaBloco3 = criarLinha(
+            casa.x + 3 * blocoLargura,
+            casa.y,
+            casa.x + 3 * blocoLargura,
+            casa.y + blocoAltura
+        );
+
+        // Bloco 4
+        const linhaInferiorBloco4 = criarLinha(
+            casa.x + 3 * blocoLargura,
+            casa.y + blocoAltura,
+            casa.x + casa.largura,
+            casa.y + blocoAltura
+        );
+
+        // Bloco 5
+        const linhaInferiorBloco5 = criarLinha(
+            casa.x,
+            casa.y + 2 * blocoAltura,
+            casa.x + blocoLargura,
+            casa.y + 2 * blocoAltura
+        );
+
+        const linhaDireitaBloco5 = criarLinha(
+            casa.x + blocoLargura,
+            casa.y + blocoAltura,
+            casa.x + blocoLargura,
+            casa.y + 2 * blocoAltura
+        );
+
+        // Bloco 6
+        const linhaInferiorBloco6 = criarLinha(
+            casa.x + blocoLargura,
+            casa.y + 2 * blocoAltura,
+            casa.x + 2 * blocoLargura,
+            casa.y + 2 * blocoAltura
+        );
+
+        const linhaDireitaBloco6 = criarLinha(
+            casa.x + 2 * blocoLargura,
+            casa.y + blocoAltura,
+            casa.x + 2 * blocoLargura,
+            casa.y + 2 * blocoAltura
+        );
+
+        // Bloco 7
+        const linhaInferiorBloco7 = criarLinha(
+            casa.x + 2 * blocoLargura,
+            casa.y + 2 * blocoAltura,
+            casa.x + 3 * blocoLargura,
+            casa.y + 2 * blocoAltura
+        );
+
+        const linhaDireitaBloco7 = criarLinha(
+            casa.x + 3 * blocoLargura,
+            casa.y + blocoAltura,
+            casa.x + 3 * blocoLargura,
+            casa.y + 2 * blocoAltura
+        );
+
+        // Bloco 8
+        const linhaInferiorBloco8 = criarLinha(
+            casa.x + 3 * blocoLargura,
+            casa.y + 2 * blocoAltura,
+            casa.x + casa.largura,
+            casa.y + 2 * blocoAltura
+        );
+
+        // Bloco 9
+        const linhaDireitaBloco9 = criarLinha(
+            casa.x + blocoLargura,
+            casa.y + 2 * blocoAltura,
+            casa.x + blocoLargura,
+            casa.y + 3 * blocoAltura
+        );
+
+        // Bloco 10
+        const linhaDireitaBloco10 = criarLinha(
+            casa.x + 2 * blocoLargura,
+            casa.y + 2 * blocoAltura,
+            casa.x + 2 * blocoLargura,
+            casa.y + 3 * blocoAltura
+        );
+
+        // Bloco 11
+        const linhaDireitaBloco11 = criarLinha(
+            casa.x + 3 * blocoLargura,
+            casa.y + 2 * blocoAltura,
+            casa.x + 3 * blocoLargura,
+            casa.y + 3 * blocoAltura
+        );
+
+        // Lista das 17 linhas interativas
+        const linhas = [
+            linhaInferiorBloco1,
+            linhaDireitaBloco1,
+            linhaInferiorBloco2,
+            linhaDireitaBloco2,
+            linhaInferiorBloco3,
+            linhaDireitaBloco3,
+            linhaInferiorBloco4,
+            linhaInferiorBloco5,
+            linhaDireitaBloco5,
+            linhaInferiorBloco6,
+            linhaDireitaBloco6,
+            linhaInferiorBloco7,
+            linhaDireitaBloco7,
+            linhaInferiorBloco8,
+            linhaDireitaBloco9,
+            linhaDireitaBloco10,
+            linhaDireitaBloco11
+        ];
+
+        // =========================================
+        // DESENHO DA CASA, ABERTURAS E GRADE
+        // =========================================
+
+        function desenhar() {
+            ctx.clearRect(
+                0, 0,
+                canvas.width,
+                canvas.height
+            );
+
+            // Desenha o perímetro da casa
             ctx.strokeStyle = "blue";
             ctx.lineWidth = 6;
 
@@ -54,33 +244,51 @@
                 casa.altura
             );
 
-            // Desenha as aberturas brancas
+            // Desenha as aberturas em branco
             ctx.strokeStyle = "white";
             ctx.lineWidth = 10;
 
-            for (let abertura of aberturas) {
+            for (const abertura of aberturas) {
                 ctx.beginPath();
 
-                switch (abertura.lado) {
-                    case "superior":
-                    case "inferior":
-                        ctx.moveTo(abertura.x - 18, abertura.y);
-                        ctx.lineTo(abertura.x + 18, abertura.y);
-                        break;
+                if (
+                    abertura.lado === "superior" ||
+                    abertura.lado === "inferior"
+                ) {
+                    ctx.moveTo(
+                        abertura.x - 18,
+                        abertura.y
+                    );
 
-                    case "esquerda":
-                    case "direita":
-                        ctx.moveTo(abertura.x, abertura.y - 18);
-                        ctx.lineTo(abertura.x, abertura.y + 18);
-                        break;
+                    ctx.lineTo(
+                        abertura.x + 18,
+                        abertura.y
+                    );
+                } else {
+                    ctx.moveTo(
+                        abertura.x,
+                        abertura.y - 18
+                    );
+
+                    ctx.lineTo(
+                        abertura.x,
+                        abertura.y + 18
+                    );
                 }
 
                 ctx.stroke();
             }
-            
+
+            // A grade só aparece após confirmar as aberturas
+            if (confirmado) {
+                desenharGrade();
+            }
+
+            // Botão OK
             if (mostrarBotao && !confirmado) {
                 ctx.fillStyle = "green";
                 ctx.fillRect(200, 325, 100, 45);
+
                 ctx.fillStyle = "white";
                 ctx.font = "18px Arial";
                 ctx.textAlign = "center";
@@ -88,275 +296,319 @@
                 ctx.fillText("OK", 250, 347);
             }
         }
-        /*
-        function verificarBorda(x, y) {
-            const esquerda = casa.x;
-            const direita = casa.x + casa.largura;
-            const superior = casa.y;
-            const inferior = casa.y + casa.altura;
 
-            // Distâncias do clique até cada borda
-            const distancias = [
-                {
-                    lado: "superior",
-                    distancia: Math.hypot(
-                        x - Math.max(esquerda, Math.min(x, direita)),
-                        y - superior
-                    ),
-                    x: Math.max(esquerda, Math.min(x, direita)),
-                    y: superior
-                },
-                {
-                    lado: "inferior",
-                    distancia: Math.hypot(
-                        x - Math.max(esquerda, Math.min(x, direita)),
-                        y - inferior
-                    ),
-                    x: Math.max(esquerda, Math.min(x, direita)),
-                    y: inferior
-                },
-                {
-                    lado: "esquerda",
-                    distancia: Math.hypot(
-                        x - esquerda,
-                        y - Math.max(superior, Math.min(y, inferior))
-                    ),
-                    x: esquerda,
-                    y: Math.max(superior, Math.min(y, inferior))
-                },
-                {
-                    lado: "direita",
-                    distancia: Math.hypot(
-                        x - direita,
-                        y - Math.max(superior, Math.min(y, inferior))
-                    ),
-                    x: direita,
-                    y: Math.max(superior, Math.min(y, inferior))
-                }
-            ];
+        // Desenha a grade e as 17 linhas coloridas
+        function desenharGrade() {
+            // Linhas verticais de base
+            ctx.strokeStyle = azulClaro;
+            ctx.lineWidth = 2;
 
-            // Procura a borda mais próxima
-            let maisProxima = distancias[0];
+            for (let i = 1; i <= 3; i++) {
+                const posX =
+                    casa.x + blocoLargura * i;
 
-            for (let i = 1; i < distancias.length; i++) {
-                if (distancias[i].distancia < maisProxima.distancia) {
-                    maisProxima = distancias[i];
-                }
+                ctx.beginPath();
+                ctx.moveTo(posX, casa.y);
+                ctx.lineTo(
+                    posX,
+                    casa.y + casa.altura
+                );
+                ctx.stroke();
             }
 
-            //return maisProxima;
-            // Encaixa a abertura na grade
-            if (maisProxima.lado === "superior" ||
-                maisProxima.lado === "inferior") {
-            
-                maisProxima.x = casa.x +
-                    Math.round((maisProxima.x - casa.x) / blocoLargura)
-                    * blocoLargura;
-            
-            } else {
-            
-                maisProxima.y = casa.y +
-                    Math.round((maisProxima.y - casa.y) / blocoAltura)
-                    * blocoAltura;
+            // Linhas horizontais de base
+            for (let i = 1; i <= 2; i++) {
+                const posY =
+                    casa.y + blocoAltura * i;
+
+                ctx.beginPath();
+                ctx.moveTo(casa.x, posY);
+                ctx.lineTo(
+                    casa.x + casa.largura,
+                    posY
+                );
+                ctx.stroke();
             }
-            
-            return maisProxima;
+
+            // Desenha cada segmento interativo
+            for (const linha of linhas) {
+                desenharLinha(linha);
+            }
         }
-        */
-        
+
+        // Desenha um segmento individual
+        function desenharLinha(linha) {
+            ctx.beginPath();
+            ctx.moveTo(linha.x1, linha.y1);
+            ctx.lineTo(linha.x2, linha.y2);
+            ctx.strokeStyle = linha.cor;
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        // =========================================
+        // IDENTIFICA A BORDA CLICADA
+        // =========================================
+
         function verificarBorda(x, y) {
             const esquerda = casa.x;
             const direita = casa.x + casa.largura;
             const superior = casa.y;
             const inferior = casa.y + casa.altura;
-        
+
             const distancias = [
                 {
                     lado: "superior",
                     distancia: Math.abs(y - superior),
-                    x: Math.max(esquerda, Math.min(x, direita)),
+                    x: Math.max(
+                        esquerda,
+                        Math.min(x, direita)
+                    ),
                     y: superior
                 },
                 {
                     lado: "inferior",
                     distancia: Math.abs(y - inferior),
-                    x: Math.max(esquerda, Math.min(x, direita)),
+                    x: Math.max(
+                        esquerda,
+                        Math.min(x, direita)
+                    ),
                     y: inferior
                 },
                 {
                     lado: "esquerda",
                     distancia: Math.abs(x - esquerda),
                     x: esquerda,
-                    y: Math.max(superior, Math.min(y, inferior))
+                    y: Math.max(
+                        superior,
+                        Math.min(y, inferior)
+                    )
                 },
                 {
                     lado: "direita",
                     distancia: Math.abs(x - direita),
                     x: direita,
-                    y: Math.max(superior, Math.min(y, inferior))
+                    y: Math.max(
+                        superior,
+                        Math.min(y, inferior)
+                    )
                 }
             ];
-        
+
             let maisProxima = distancias[0];
-        
+
             for (let i = 1; i < distancias.length; i++) {
-                if (distancias[i].distancia < maisProxima.distancia) {
+                if (
+                    distancias[i].distancia <
+                    maisProxima.distancia
+                ) {
                     maisProxima = distancias[i];
                 }
             }
-        
+
             let coluna;
             let linha;
-        
-            if (maisProxima.lado === "superior" ||
-                maisProxima.lado === "inferior") {
-        
-                coluna = Math.max(0, Math.min(3,
-                    Math.floor((x - casa.x) / blocoLargura)));
-        
-                linha = maisProxima.lado === "superior" ? 0 : 2;
-        
-                maisProxima.x = casa.x + coluna * blocoLargura
-                    + blocoLargura / 2;
-        
-                maisProxima.y = maisProxima.lado === "superior"
-                    ? casa.y
-                    : casa.y + casa.altura;
-        
+
+            if (
+                maisProxima.lado === "superior" ||
+                maisProxima.lado === "inferior"
+            ) {
+                coluna = Math.max(
+                    0,
+                    Math.min(
+                        3,
+                        Math.floor(
+                            (x - casa.x) / blocoLargura
+                        )
+                    )
+                );
+
+                linha =
+                    maisProxima.lado === "superior"
+                        ? 0
+                        : 2;
+
+                maisProxima.x =
+                    casa.x +
+                    coluna * blocoLargura +
+                    blocoLargura / 2;
+
+                maisProxima.y =
+                    maisProxima.lado === "superior"
+                        ? casa.y
+                        : casa.y + casa.altura;
+
             } else {
-                linha = Math.max(0, Math.min(2,
-                    Math.floor((y - casa.y) / blocoAltura)));
-        
-                coluna = maisProxima.lado === "esquerda" ? 0 : 3;
-        
-                maisProxima.x = maisProxima.lado === "esquerda"
-                    ? casa.x
-                    : casa.x + casa.largura;
-        
-                maisProxima.y = casa.y + linha * blocoAltura
-                    + blocoAltura / 2;
+                linha = Math.max(
+                    0,
+                    Math.min(
+                        2,
+                        Math.floor(
+                            (y - casa.y) / blocoAltura
+                        )
+                    )
+                );
+
+                coluna =
+                    maisProxima.lado === "esquerda"
+                        ? 0
+                        : 3;
+
+                maisProxima.x =
+                    maisProxima.lado === "esquerda"
+                        ? casa.x
+                        : casa.x + casa.largura;
+
+                maisProxima.y =
+                    casa.y +
+                    linha * blocoAltura +
+                    blocoAltura / 2;
             }
-        
-            maisProxima.posicao = maisProxima.lado + "_" + String.fromCharCode(65 + coluna) + (linha + 1);
-        
+
+            maisProxima.posicao =
+                maisProxima.lado + "_" +
+                String.fromCharCode(65 + coluna) +
+                (linha + 1);
+
             return maisProxima;
         }
-        
-        /*
+
+        // =========================================
+        // DETECTA CLIQUES NAS LINHAS
+        // =========================================
+
+        function clicouNaLinha(mouseX, mouseY, linha) {
+            const tolerancia = 8;
+
+            if (linha.x1 === linha.x2) {
+                // Linha vertical
+                return (
+                    Math.abs(mouseX - linha.x1) <= tolerancia &&
+                    mouseY >=
+                        Math.min(linha.y1, linha.y2) - tolerancia &&
+                    mouseY <=
+                        Math.max(linha.y1, linha.y2) + tolerancia
+                );
+            }
+
+            // Linha horizontal
+            return (
+                Math.abs(mouseY - linha.y1) <= tolerancia &&
+                mouseX >=
+                    Math.min(linha.x1, linha.x2) - tolerancia &&
+                mouseX <=
+                    Math.max(linha.x1, linha.x2) + tolerancia
+            );
+        }
+
+        function alternarCorDaLinha(mouseX, mouseY) {
+            // Verifica as linhas na ordem inversa do desenho
+            for (let i = linhas.length - 1; i >= 0; i--) {
+                const linha = linhas[i];
+
+                if (clicouNaLinha(mouseX, mouseY, linha)) {
+                    linha.cor =
+                        linha.cor === azulEscuro
+                            ? azulClaro
+                            : azulEscuro;
+
+                    desenhar();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // =========================================
+        // EVENTO PRINCIPAL DE CLIQUE
+        // =========================================
+
         canvas.addEventListener("click", function(event) {
             const rect = canvas.getBoundingClientRect();
 
-            // Converte o clique para as coordenadas do Canvas
-            const x = (event.clientX - rect.left) *
-                      (canvas.width / rect.width);
+            const mouseX =
+                (event.clientX - rect.left) *
+                canvas.width / rect.width;
 
-            const y = (event.clientY - rect.top) *
-                      (canvas.height / rect.height);
+            const mouseY =
+                (event.clientY - rect.top) *
+                canvas.height / rect.height;
 
-            // Se já existem duas aberturas, reinicia
-            if (aberturas.length === 2) {
-                aberturas = [];
-                desenhar();
-
-                mensagem.textContent =
-                    "Aberturas apagadas! Clique para criar a primeira.";
-
-                return;
-            }
-
-            // Descobre a borda mais próxima do clique
-            const borda = verificarBorda(x, y);
-
-            // Guarda a posição escolhida pelo usuário
-            aberturas.push({
-                lado: borda.lado,
-                x: borda.x,
-                y: borda.y
-            });
-
-            desenhar();
-
-            if (aberturas.length === 1) {
-                mensagem.textContent =
-                    "Primeira abertura criada. Escolha a segunda.";
-            } else {
-                mensagem.textContent =
-                    "Duas aberturas criadas. O próximo clique reiniciará tudo.";
-            }
-        });*/
-        
-        canvas.addEventListener("click", function(event) {
-
-            // Se confirmou, nenhuma interação é permitida
+            // Depois da confirmação, só permite
+            // interagir com as 17 linhas
             if (confirmado) {
+                alternarCorDaLinha(mouseX, mouseY);
                 return;
             }
-    
-            const rect = canvas.getBoundingClientRect();
-    
-            const x = (event.clientX - rect.left) * (canvas.width / rect.width);
-    
-            const y = (event.clientY - rect.top) * (canvas.height / rect.height);
-    
-            // Verifica se o clique foi no botão OK
-            if (mostrarBotao &&
-                x >= 200 && x <= 300 &&
-                y >= 325 && y <= 370) {
-    
+
+            // Verifica o botão OK
+            if (
+                mostrarBotao &&
+                mouseX >= 200 && mouseX <= 300 &&
+                mouseY >= 325 && mouseY <= 370
+            ) {
                 confirmado = true;
                 mostrarBotao = false;
-    
-                mensagem.textContent = "Aberturas confirmadas! O desenho está bloqueado.";
-    
+
+                mensagem.textContent =
+                    "Aberturas confirmadas! Agora interaja com as 17 linhas.";
+
                 desenhar();
-                return;
-            }
-    
-            // Se já existem duas aberturas, reinicia tudo
-            if (aberturas.length === 2) {
-                aberturas = [];
-                mostrarBotao = false;
-    
-                desenhar();
-    
-                mensagem.textContent = "Aberturas apagadas! Escolha a primeira novamente.";
-    
                 return;
             }
 
-            const borda = verificarBorda(x, y);
-            
+            // Se já existem duas aberturas,
+            // o próximo clique fora do botão reinicia
+            if (aberturas.length === 2) {
+                aberturas = [];
+                mostrarBotao = false;
+
+                mensagem.textContent =
+                    "Aberturas apagadas! Escolha a primeira novamente.";
+
+                desenhar();
+                return;
+            }
+
+            // Encontra a posição da abertura
+            const borda = verificarBorda(mouseX, mouseY);
+
             // Impede duas aberturas na mesma posição
             const jaExiste = aberturas.some(
-                abertura => abertura.posicao === borda.posicao
+                abertura =>
+                    abertura.posicao === borda.posicao
             );
-            
+
             if (jaExiste) {
                 mensagem.textContent =
                     "Essa posição já está ocupada. Escolha outra abertura.";
-            
+
                 return;
             }
-            
+
+            // Registra a abertura escolhida
             aberturas.push({
                 lado: borda.lado,
                 x: borda.x,
                 y: borda.y,
                 posicao: borda.posicao
             });
-    
-            // O botão só aparece com duas aberturas
+
             if (aberturas.length === 2) {
                 mostrarBotao = true;
-    
-                mensagem.textContent = "Duas aberturas criadas. Clique em OK para confirmar.";
+
+                mensagem.textContent =
+                    "Duas aberturas criadas. Clique em OK para confirmar.";
             } else {
-                mensagem.textContent = "Primeira abertura criada. Escolha a segunda.";
+                mensagem.textContent =
+                    "Primeira abertura criada. Escolha a segunda.";
             }
-    
+
             desenhar();
         });
 
+        // Desenha a casa inicial
         desenhar();
     </script>
 
