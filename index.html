@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aberturas da casa</title>
-
+    <title>Labirinto da casa</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 16px;
+        }
+
         canvas {
+            display: block;
             border: 1px solid #ccc;
             max-width: 100%;
             height: auto;
             touch-action: manipulation;
         }
+
+        #mensagem {
+            max-width: 500px;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
-
-    <h2>Escolha as aberturas da casa</h2>
-    <p id="mensagem">
-        Clique perto de uma borda para criar a primeira abertura.
-    </p>
-
+    <h2>Monte o labirinto</h2>
+    <p id="mensagem">Clique perto de uma borda para escolher a entrada.</p>
     <canvas id="meuCanvas" width="500" height="400"></canvas>
 
     <script>
@@ -28,327 +34,180 @@
         const ctx = canvas.getContext("2d");
         const mensagem = document.getElementById("mensagem");
 
-        // Dimensões da casa
-        const casa = {
-            x: 60,
-            y: 50,
-            largura: 380,
-            altura: 240
-        };
+        // ==================================================
+        // 1. MEDIDAS E CORES
+        // ==================================================
 
-        // Medidas de cada bloco
-        const blocoLargura = casa.largura / 4;
-        const blocoAltura = casa.altura / 3;
+        const casa = { x: 60, y: 50, largura: 380, altura: 240 };
+        const colunas = 4;
+        const linhasDeCelulas = 3;
+        const bw = casa.largura / colunas;
+        const bh = casa.altura / linhasDeCelulas;
 
-        // Cores das linhas
-        const azulEscuro = "#003399";
-        const azulClaro = "lightblue";
+        const azulEscuro = "#003399"; // parede: bloqueia a passagem
+        const azulClaro = "lightblue"; // passagem livre
+        const larguraBotao = 100;
+        const alturaBotao = 45;
+        const botaoX = 200;
+        const botaoY = 325;
 
-        // Estado do programa
+        // ==================================================
+        // 2. ESTADO DO PROGRAMA
+        // ==================================================
+
+        // Etapas: "aberturas", "labirinto" e "finalizado"
+        let etapa = "aberturas";
         let aberturas = [];
-        let confirmado = false;
         let mostrarBotao = false;
+        let caminhoExiste = false;
 
-        // Sorteia a cor inicial de cada linha
-        function sortearCorInicial() {
-            return Math.random() < 0.5
-                ? azulEscuro
-                : azulClaro;
+        // Cada linha tem uma posição na grade e um estado.
+        // ativa = true: azul escuro, parede fechada.
+        // ativa = false: azul claro, passagem aberta.
+        function sortearEstado() {
+            return Math.random() < 0.5;
         }
 
-        // Cria uma linha interativa
-        function criarLinha(x1, y1, x2, y2) {
+        function criarLinha(tipo, col, lin) {
             return {
-                x1,
-                y1,
-                x2,
-                y2,
-                cor: sortearCorInicial()
+                tipo,
+                col,
+                lin,
+                ativa: sortearEstado()
             };
         }
 
-        // =========================================
-        // CRIAÇÃO DAS 17 LINHAS INTERATIVAS
-        // =========================================
+        // ==================================================
+        // 3. AS 17 LINHAS INTERATIVAS
+        // ==================================================
 
-        // Bloco 1
-        const linhaInferiorBloco1 = criarLinha(
-            casa.x,
-            casa.y + blocoAltura,
-            casa.x + blocoLargura,
-            casa.y + blocoAltura
-        );
-
-        const linhaDireitaBloco1 = criarLinha(
-            casa.x + blocoLargura,
-            casa.y,
-            casa.x + blocoLargura,
-            casa.y + blocoAltura
-        );
-
-        // Bloco 2
-        const linhaInferiorBloco2 = criarLinha(
-            casa.x + blocoLargura,
-            casa.y + blocoAltura,
-            casa.x + 2 * blocoLargura,
-            casa.y + blocoAltura
-        );
-
-        const linhaDireitaBloco2 = criarLinha(
-            casa.x + 2 * blocoLargura,
-            casa.y,
-            casa.x + 2 * blocoLargura,
-            casa.y + blocoAltura
-        );
-
-        // Bloco 3
-        const linhaInferiorBloco3 = criarLinha(
-            casa.x + 2 * blocoLargura,
-            casa.y + blocoAltura,
-            casa.x + 3 * blocoLargura,
-            casa.y + blocoAltura
-        );
-
-        const linhaDireitaBloco3 = criarLinha(
-            casa.x + 3 * blocoLargura,
-            casa.y,
-            casa.x + 3 * blocoLargura,
-            casa.y + blocoAltura
-        );
-
-        // Bloco 4
-        const linhaInferiorBloco4 = criarLinha(
-            casa.x + 3 * blocoLargura,
-            casa.y + blocoAltura,
-            casa.x + casa.largura,
-            casa.y + blocoAltura
-        );
-
-        // Bloco 5
-        const linhaInferiorBloco5 = criarLinha(
-            casa.x,
-            casa.y + 2 * blocoAltura,
-            casa.x + blocoLargura,
-            casa.y + 2 * blocoAltura
-        );
-
-        const linhaDireitaBloco5 = criarLinha(
-            casa.x + blocoLargura,
-            casa.y + blocoAltura,
-            casa.x + blocoLargura,
-            casa.y + 2 * blocoAltura
-        );
-
-        // Bloco 6
-        const linhaInferiorBloco6 = criarLinha(
-            casa.x + blocoLargura,
-            casa.y + 2 * blocoAltura,
-            casa.x + 2 * blocoLargura,
-            casa.y + 2 * blocoAltura
-        );
-
-        const linhaDireitaBloco6 = criarLinha(
-            casa.x + 2 * blocoLargura,
-            casa.y + blocoAltura,
-            casa.x + 2 * blocoLargura,
-            casa.y + 2 * blocoAltura
-        );
-
-        // Bloco 7
-        const linhaInferiorBloco7 = criarLinha(
-            casa.x + 2 * blocoLargura,
-            casa.y + 2 * blocoAltura,
-            casa.x + 3 * blocoLargura,
-            casa.y + 2 * blocoAltura
-        );
-
-        const linhaDireitaBloco7 = criarLinha(
-            casa.x + 3 * blocoLargura,
-            casa.y + blocoAltura,
-            casa.x + 3 * blocoLargura,
-            casa.y + 2 * blocoAltura
-        );
-
-        // Bloco 8
-        const linhaInferiorBloco8 = criarLinha(
-            casa.x + 3 * blocoLargura,
-            casa.y + 2 * blocoAltura,
-            casa.x + casa.largura,
-            casa.y + 2 * blocoAltura
-        );
-
-        // Bloco 9
-        const linhaDireitaBloco9 = criarLinha(
-            casa.x + blocoLargura,
-            casa.y + 2 * blocoAltura,
-            casa.x + blocoLargura,
-            casa.y + 3 * blocoAltura
-        );
-
-        // Bloco 10
-        const linhaDireitaBloco10 = criarLinha(
-            casa.x + 2 * blocoLargura,
-            casa.y + 2 * blocoAltura,
-            casa.x + 2 * blocoLargura,
-            casa.y + 3 * blocoAltura
-        );
-
-        // Bloco 11
-        const linhaDireitaBloco11 = criarLinha(
-            casa.x + 3 * blocoLargura,
-            casa.y + 2 * blocoAltura,
-            casa.x + 3 * blocoLargura,
-            casa.y + 3 * blocoAltura
-        );
-
-        // Lista das 17 linhas interativas
         const linhas = [
-            linhaInferiorBloco1,
-            linhaDireitaBloco1,
-            linhaInferiorBloco2,
-            linhaDireitaBloco2,
-            linhaInferiorBloco3,
-            linhaDireitaBloco3,
-            linhaInferiorBloco4,
-            linhaInferiorBloco5,
-            linhaDireitaBloco5,
-            linhaInferiorBloco6,
-            linhaDireitaBloco6,
-            linhaInferiorBloco7,
-            linhaDireitaBloco7,
-            linhaInferiorBloco8,
-            linhaDireitaBloco9,
-            linhaDireitaBloco10,
-            linhaDireitaBloco11
+            // Horizontais entre as células das linhas 1 e 2
+            criarLinha("h", 0, 1),
+            criarLinha("h", 1, 1),
+            criarLinha("h", 2, 1),
+            criarLinha("h", 3, 1),
+
+            // Horizontais entre as células das linhas 2 e 3
+            criarLinha("h", 0, 2),
+            criarLinha("h", 1, 2),
+            criarLinha("h", 2, 2),
+            criarLinha("h", 3, 2),
+
+            // Verticais na primeira faixa de células
+            criarLinha("v", 1, 0),
+            criarLinha("v", 2, 0),
+            criarLinha("v", 3, 0),
+
+            // Verticais na segunda faixa de células
+            criarLinha("v", 1, 1),
+            criarLinha("v", 2, 1),
+            criarLinha("v", 3, 1),
+
+            // Verticais na terceira faixa de células
+            criarLinha("v", 1, 2),
+            criarLinha("v", 2, 2),
+            criarLinha("v", 3, 2)
         ];
 
-        // =========================================
-        // DESENHO DA CASA, ABERTURAS E GRADE
-        // =========================================
+        // ==================================================
+        // 4. DESENHO
+        // ==================================================
 
         function desenhar() {
-            ctx.clearRect(
-                0, 0,
-                canvas.width,
-                canvas.height
-            );
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Desenha o perímetro da casa
+            // Contorno externo da casa
             ctx.strokeStyle = "blue";
             ctx.lineWidth = 6;
+            ctx.strokeRect(casa.x, casa.y, casa.largura, casa.altura);
 
-            ctx.strokeRect(
-                casa.x,
-                casa.y,
-                casa.largura,
-                casa.altura
-            );
-
-            // Desenha as aberturas em branco
+            // Aberturas na borda
             ctx.strokeStyle = "white";
             ctx.lineWidth = 10;
 
             for (const abertura of aberturas) {
                 ctx.beginPath();
 
-                if (
-                    abertura.lado === "superior" ||
-                    abertura.lado === "inferior"
-                ) {
-                    ctx.moveTo(
-                        abertura.x - 18,
-                        abertura.y
-                    );
-
-                    ctx.lineTo(
-                        abertura.x + 18,
-                        abertura.y
-                    );
+                if (abertura.lado === "superior" ||
+                    abertura.lado === "inferior") {
+                    ctx.moveTo(abertura.x - 18, abertura.y);
+                    ctx.lineTo(abertura.x + 18, abertura.y);
                 } else {
-                    ctx.moveTo(
-                        abertura.x,
-                        abertura.y - 18
-                    );
-
-                    ctx.lineTo(
-                        abertura.x,
-                        abertura.y + 18
-                    );
+                    ctx.moveTo(abertura.x, abertura.y - 18);
+                    ctx.lineTo(abertura.x, abertura.y + 18);
                 }
 
                 ctx.stroke();
             }
 
-            // A grade só aparece após confirmar as aberturas
-            if (confirmado) {
+            // A grade interna só aparece na etapa de edição
+            if (etapa !== "aberturas") {
                 desenharGrade();
             }
 
-            // Botão OK
-            if (mostrarBotao && !confirmado) {
+            // O botão aparece conforme a etapa e a validação
+            if (mostrarBotao && etapa !== "finalizado") {
                 ctx.fillStyle = "green";
-                ctx.fillRect(200, 325, 100, 45);
+                ctx.fillRect(botaoX, botaoY, larguraBotao, alturaBotao);
 
                 ctx.fillStyle = "white";
                 ctx.font = "18px Arial";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.fillText("OK", 250, 347);
+                ctx.fillText("OK", botaoX + larguraBotao / 2,
+                    botaoY + alturaBotao / 2);
             }
         }
 
-        // Desenha a grade e as 17 linhas coloridas
         function desenharGrade() {
-            // Linhas verticais de base
+            // Linhas claras de base
             ctx.strokeStyle = azulClaro;
             ctx.lineWidth = 2;
 
-            for (let i = 1; i <= 3; i++) {
-                const posX =
-                    casa.x + blocoLargura * i;
-
+            for (let i = 1; i < colunas; i++) {
+                const x = casa.x + i * bw;
                 ctx.beginPath();
-                ctx.moveTo(posX, casa.y);
-                ctx.lineTo(
-                    posX,
-                    casa.y + casa.altura
-                );
+                ctx.moveTo(x, casa.y);
+                ctx.lineTo(x, casa.y + casa.altura);
                 ctx.stroke();
             }
 
-            // Linhas horizontais de base
-            for (let i = 1; i <= 2; i++) {
-                const posY =
-                    casa.y + blocoAltura * i;
-
+            for (let i = 1; i < linhasDeCelulas; i++) {
+                const y = casa.y + i * bh;
                 ctx.beginPath();
-                ctx.moveTo(casa.x, posY);
-                ctx.lineTo(
-                    casa.x + casa.largura,
-                    posY
-                );
+                ctx.moveTo(casa.x, y);
+                ctx.lineTo(casa.x + casa.largura, y);
                 ctx.stroke();
             }
 
-            // Desenha cada segmento interativo
+            // Segmentos que o usuário pode alterar
             for (const linha of linhas) {
                 desenharLinha(linha);
             }
         }
 
-        // Desenha um segmento individual
         function desenharLinha(linha) {
+            const x = casa.x + linha.col * bw;
+            const y = casa.y + linha.lin * bh;
+
             ctx.beginPath();
-            ctx.moveTo(linha.x1, linha.y1);
-            ctx.lineTo(linha.x2, linha.y2);
-            ctx.strokeStyle = linha.cor;
+            ctx.moveTo(x, y);
+
+            if (linha.tipo === "h") {
+                ctx.lineTo(x + bw, y);
+            } else {
+                ctx.lineTo(x, y + bh);
+            }
+
+            ctx.strokeStyle = linha.ativa ? azulEscuro : azulClaro;
             ctx.lineWidth = 4;
             ctx.stroke();
         }
 
-        // =========================================
-        // IDENTIFICA A BORDA CLICADA
-        // =========================================
+        // ==================================================
+        // 5. ESCOLHA DA ENTRADA E DA SAÍDA
+        // ==================================================
 
         function verificarBorda(x, y) {
             const esquerda = casa.x;
@@ -356,261 +215,261 @@
             const superior = casa.y;
             const inferior = casa.y + casa.altura;
 
-            const distancias = [
-                {
-                    lado: "superior",
-                    distancia: Math.abs(y - superior),
-                    x: Math.max(
-                        esquerda,
-                        Math.min(x, direita)
-                    ),
-                    y: superior
-                },
-                {
-                    lado: "inferior",
-                    distancia: Math.abs(y - inferior),
-                    x: Math.max(
-                        esquerda,
-                        Math.min(x, direita)
-                    ),
-                    y: inferior
-                },
-                {
-                    lado: "esquerda",
-                    distancia: Math.abs(x - esquerda),
-                    x: esquerda,
-                    y: Math.max(
-                        superior,
-                        Math.min(y, inferior)
-                    )
-                },
-                {
-                    lado: "direita",
-                    distancia: Math.abs(x - direita),
-                    x: direita,
-                    y: Math.max(
-                        superior,
-                        Math.min(y, inferior)
-                    )
-                }
+            const candidatas = [
+                { lado: "superior", distancia: Math.abs(y - superior) },
+                { lado: "inferior", distancia: Math.abs(y - inferior) },
+                { lado: "esquerda", distancia: Math.abs(x - esquerda) },
+                { lado: "direita", distancia: Math.abs(x - direita) }
             ];
 
-            let maisProxima = distancias[0];
-
-            for (let i = 1; i < distancias.length; i++) {
-                if (
-                    distancias[i].distancia <
-                    maisProxima.distancia
-                ) {
-                    maisProxima = distancias[i];
+            let borda = candidatas[0];
+            for (const candidata of candidatas) {
+                if (candidata.distancia < borda.distancia) {
+                    borda = candidata;
                 }
             }
 
-            let coluna;
-            let linha;
+            let col, lin, aberturaX, aberturaY;
 
-            if (
-                maisProxima.lado === "superior" ||
-                maisProxima.lado === "inferior"
-            ) {
-                coluna = Math.max(
-                    0,
-                    Math.min(
-                        3,
-                        Math.floor(
-                            (x - casa.x) / blocoLargura
-                        )
-                    )
-                );
-
-                linha =
-                    maisProxima.lado === "superior"
-                        ? 0
-                        : 2;
-
-                maisProxima.x =
-                    casa.x +
-                    coluna * blocoLargura +
-                    blocoLargura / 2;
-
-                maisProxima.y =
-                    maisProxima.lado === "superior"
-                        ? casa.y
-                        : casa.y + casa.altura;
-
+            if (borda.lado === "superior" || borda.lado === "inferior") {
+                col = Math.max(0, Math.min(3,
+                    Math.floor((x - casa.x) / bw)));
+                lin = borda.lado === "superior" ? 0 : 2;
+                aberturaX = casa.x + col * bw + bw / 2;
+                aberturaY = borda.lado === "superior"
+                    ? casa.y
+                    : casa.y + casa.altura;
             } else {
-                linha = Math.max(
-                    0,
-                    Math.min(
-                        2,
-                        Math.floor(
-                            (y - casa.y) / blocoAltura
-                        )
-                    )
-                );
-
-                coluna =
-                    maisProxima.lado === "esquerda"
-                        ? 0
-                        : 3;
-
-                maisProxima.x =
-                    maisProxima.lado === "esquerda"
-                        ? casa.x
-                        : casa.x + casa.largura;
-
-                maisProxima.y =
-                    casa.y +
-                    linha * blocoAltura +
-                    blocoAltura / 2;
+                lin = Math.max(0, Math.min(2,
+                    Math.floor((y - casa.y) / bh)));
+                col = borda.lado === "esquerda" ? 0 : 3;
+                aberturaX = borda.lado === "esquerda"
+                    ? casa.x
+                    : casa.x + casa.largura;
+                aberturaY = casa.y + lin * bh + bh / 2;
             }
 
-            maisProxima.posicao =
-                maisProxima.lado + "_" +
-                String.fromCharCode(65 + coluna) +
-                (linha + 1);
-
-            return maisProxima;
+            return {
+                lado: borda.lado,
+                x: aberturaX,
+                y: aberturaY,
+                col,
+                lin,
+                posicao: borda.lado + "_" + col + "_" + lin
+            };
         }
 
-        // =========================================
-        // DETECTA CLIQUES NAS LINHAS
-        // =========================================
+        // ==================================================
+        // 6. VALIDAÇÃO DO CAMINHO
+        // ==================================================
 
-        function clicouNaLinha(mouseX, mouseY, linha) {
-            const tolerancia = 8;
+        // Descobre se a passagem entre duas células vizinhas está livre.
+        function passagemLivre(col1, lin1, col2, lin2) {
+            let tipo, col, lin;
 
-            if (linha.x1 === linha.x2) {
-                // Linha vertical
-                return (
-                    Math.abs(mouseX - linha.x1) <= tolerancia &&
-                    mouseY >=
-                        Math.min(linha.y1, linha.y2) - tolerancia &&
-                    mouseY <=
-                        Math.max(linha.y1, linha.y2) + tolerancia
-                );
+            if (col1 === col2) {
+                // Células uma acima da outra: cruzam uma linha horizontal.
+                tipo = "h";
+                col = col1;
+                lin = Math.max(lin1, lin2);
+            } else {
+                // Células lado a lado: cruzam uma linha vertical.
+                tipo = "v";
+                col = Math.max(col1, col2);
+                lin = lin1;
             }
 
-            // Linha horizontal
-            return (
-                Math.abs(mouseY - linha.y1) <= tolerancia &&
-                mouseX >=
-                    Math.min(linha.x1, linha.x2) - tolerancia &&
-                mouseX <=
-                    Math.max(linha.x1, linha.x2) + tolerancia
+            const linha = linhas.find(item =>
+                item.tipo === tipo &&
+                item.col === col &&
+                item.lin === lin
             );
+
+            // Linha azul clara (ativa=false) significa passagem livre.
+            return linha ? !linha.ativa : false;
         }
 
-        function alternarCorDaLinha(mouseX, mouseY) {
-            // Verifica as linhas na ordem inversa do desenho
-            for (let i = linhas.length - 1; i >= 0; i--) {
-                const linha = linhas[i];
+        // Converte a abertura da borda na célula interna conectada a ela.
+        function celulaDaAbertura(abertura) {
+            return { col: abertura.col, lin: abertura.lin };
+        }
 
-                if (clicouNaLinha(mouseX, mouseY, linha)) {
-                    linha.cor =
-                        linha.cor === azulEscuro
-                            ? azulClaro
-                            : azulEscuro;
+        // Busca em largura (BFS): verifica se existe rota da entrada à saída.
+        function existeCaminho() {
+            if (aberturas.length !== 2) return false;
 
-                    desenhar();
+            const entrada = celulaDaAbertura(aberturas[0]);
+            const saida = celulaDaAbertura(aberturas[1]);
+
+            const fila = [entrada];
+            const visitadas = new Set([chaveCelula(entrada)]);
+
+            // Cima, baixo, esquerda, direita
+            const direcoes = [
+                [0, -1],
+                [0, 1],
+                [-1, 0],
+                [1, 0]
+            ];
+
+            while (fila.length > 0) {
+                const atual = fila.shift();
+
+                if (atual.col === saida.col && atual.lin === saida.lin) {
                     return true;
+                }
+
+                for (const [dc, dl] of direcoes) {
+                    const proxima = {
+                        col: atual.col + dc,
+                        lin: atual.lin + dl
+                    };
+
+                    // Ignora posições fora da grade 4 x 3.
+                    if (proxima.col < 0 || proxima.col >= colunas ||
+                        proxima.lin < 0 || proxima.lin >= linhasDeCelulas) {
+                        continue;
+                    }
+
+                    const chave = chaveCelula(proxima);
+                    if (visitadas.has(chave)) continue;
+
+                    if (!passagemLivre(
+                        atual.col, atual.lin,
+                        proxima.col, proxima.lin
+                    )) {
+                        continue;
+                    }
+
+                    visitadas.add(chave);
+                    fila.push(proxima);
                 }
             }
 
             return false;
         }
 
-        // =========================================
-        // EVENTO PRINCIPAL DE CLIQUE
-        // =========================================
+        function chaveCelula(celula) {
+            return celula.col + "," + celula.lin;
+        }
 
-        canvas.addEventListener("click", function(event) {
-            const rect = canvas.getBoundingClientRect();
+        // Recalcula o caminho e mostra/esconde o botão de confirmação.
+        function atualizarValidacao() {
+            caminhoExiste = existeCaminho();
+            mostrarBotao = caminhoExiste;
 
-            const mouseX =
-                (event.clientX - rect.left) *
-                canvas.width / rect.width;
-
-            const mouseY =
-                (event.clientY - rect.top) *
-                canvas.height / rect.height;
-
-            // Depois da confirmação, só permite
-            // interagir com as 17 linhas
-            if (confirmado) {
-                alternarCorDaLinha(mouseX, mouseY);
-                return;
-            }
-
-            // Verifica o botão OK
-            if (
-                mostrarBotao &&
-                mouseX >= 200 && mouseX <= 300 &&
-                mouseY >= 325 && mouseY <= 370
-            ) {
-                confirmado = true;
-                mostrarBotao = false;
-
-                mensagem.textContent =
-                    "Aberturas confirmadas! Agora interaja com as 17 linhas.";
-
-                desenhar();
-                return;
-            }
-
-            // Se já existem duas aberturas,
-            // o próximo clique fora do botão reinicia
-            if (aberturas.length === 2) {
-                aberturas = [];
-                mostrarBotao = false;
-
-                mensagem.textContent =
-                    "Aberturas apagadas! Escolha a primeira novamente.";
-
-                desenhar();
-                return;
-            }
-
-            // Encontra a posição da abertura
-            const borda = verificarBorda(mouseX, mouseY);
-
-            // Impede duas aberturas na mesma posição
-            const jaExiste = aberturas.some(
-                abertura =>
-                    abertura.posicao === borda.posicao
-            );
-
-            if (jaExiste) {
-                mensagem.textContent =
-                    "Essa posição já está ocupada. Escolha outra abertura.";
-
-                return;
-            }
-
-            // Registra a abertura escolhida
-            aberturas.push({
-                lado: borda.lado,
-                x: borda.x,
-                y: borda.y,
-                posicao: borda.posicao
-            });
-
-            if (aberturas.length === 2) {
-                mostrarBotao = true;
-
-                mensagem.textContent =
-                    "Duas aberturas criadas. Clique em OK para confirmar.";
-            } else {
-                mensagem.textContent =
-                    "Primeira abertura criada. Escolha a segunda.";
+            if (etapa === "labirinto") {
+                mensagem.textContent = caminhoExiste
+                    ? "Existe um caminho entre a entrada e a saída. Clique em OK para finalizar."
+                    : "Ainda não existe caminho. Altere as linhas até conectar a entrada à saída.";
             }
 
             desenhar();
+        }
+
+        // ==================================================
+        // 7. CLIQUES NO CANVAS
+        // ==================================================
+
+        function clicouNoBotao(x, y) {
+            return x >= botaoX && x <= botaoX + larguraBotao &&
+                y >= botaoY && y <= botaoY + alturaBotao;
+        }
+
+        function clicouNaLinha(x, y, linha) {
+            const tolerancia = 8;
+            const x1 = casa.x + linha.col * bw;
+            const y1 = casa.y + linha.lin * bh;
+            const x2 = linha.tipo === "h" ? x1 + bw : x1;
+            const y2 = linha.tipo === "v" ? y1 + bh : y1;
+
+            if (linha.tipo === "h") {
+                return Math.abs(y - y1) <= tolerancia &&
+                    x >= x1 - tolerancia && x <= x2 + tolerancia;
+            }
+
+            return Math.abs(x - x1) <= tolerancia &&
+                y >= y1 - tolerancia && y <= y2 + tolerancia;
+        }
+
+        canvas.addEventListener("click", function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) * canvas.width / rect.width;
+            const y = (event.clientY - rect.top) * canvas.height / rect.height;
+
+            // Depois de finalizar, nenhum clique altera o cenário.
+            if (etapa === "finalizado") return;
+
+            // Etapa 1: escolher as duas aberturas.
+            if (etapa === "aberturas") {
+                if (mostrarBotao && clicouNoBotao(x, y)) {
+                    etapa = "labirinto";
+                    mensagem.textContent =
+                        "Altere as linhas. Azul escuro bloqueia; azul claro permite passagem.";
+                    atualizarValidacao();
+                    return;
+                }
+
+                // Se as duas aberturas já foram escolhidas, um clique fora
+                // do botão reinicia a seleção.
+                if (aberturas.length === 2) {
+                    aberturas = [];
+                    mostrarBotao = false;
+                    mensagem.textContent =
+                        "Seleção reiniciada. Clique perto da borda para escolher a entrada.";
+                    desenhar();
+                    return;
+                }
+
+                const nova = verificarBorda(x, y);
+                const repetida = aberturas.some(a => a.posicao === nova.posicao);
+
+                if (repetida) {
+                    mensagem.textContent =
+                        "Você já escolheu essa posição. Escolha outra borda para a segunda abertura.";
+                    return;
+                }
+
+                aberturas.push(nova);
+
+                if (aberturas.length === 1) {
+                    mensagem.textContent =
+                        "Entrada escolhida. Agora clique perto da borda para escolher a saída.";
+                } else {
+                    mostrarBotao = true;
+                    mensagem.textContent =
+                        "Entrada e saída escolhidas. Clique em OK para editar o labirinto.";
+                }
+
+                desenhar();
+                return;
+            }
+
+            // Etapa 2: editar linhas e validar depois de cada alteração.
+            if (etapa === "labirinto") {
+                if (mostrarBotao && clicouNoBotao(x, y)) {
+                    etapa = "finalizado";
+                    mostrarBotao = false;
+                    mensagem.textContent =
+                        "Labirinto finalizado! O cenário está bloqueado.";
+                    desenhar();
+                    return;
+                }
+
+                // Verifica da última linha desenhada para a primeira.
+                for (let i = linhas.length - 1; i >= 0; i--) {
+                    const linha = linhas[i];
+
+                    if (clicouNaLinha(x, y, linha)) {
+                        linha.ativa = !linha.ativa;
+                        atualizarValidacao();
+                        return;
+                    }
+                }
+            }
         });
 
-        // Desenha a casa inicial
         desenhar();
     </script>
-
 </body>
 </html>
