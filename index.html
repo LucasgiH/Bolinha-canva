@@ -160,7 +160,7 @@
             }
         }
 
-        function desenharGrade() {
+        /*function desenharGrade() {
             // Linhas claras de base
             ctx.strokeStyle = azulClaro;
             ctx.lineWidth = 2;
@@ -185,9 +185,42 @@
             for (const linha of linhas) {
                 desenharLinha(linha);
             }
+        }*/
+        function desenharGrade() {
+            // Linhas claras de base (só desenha se NÃO estiver finalizado)
+            if (etapa !== "finalizado") {
+                ctx.strokeStyle = azulClaro;
+                ctx.lineWidth = 2;
+        
+                for (let i = 1; i < colunas; i++) {
+                    const x = casa.x + i * bw;
+                    ctx.beginPath();
+                    ctx.moveTo(x, casa.y);
+                    ctx.lineTo(x, casa.y + casa.altura);
+                    ctx.stroke();
+                }
+        
+                for (let i = 1; i < linhasDeCelulas; i++) {
+                    const y = casa.y + i * bh;
+                    ctx.beginPath();
+                    ctx.moveTo(casa.x, y);
+                    ctx.lineTo(casa.x + casa.largura, y);
+                    ctx.stroke();
+                }
+            }
+        
+            // Segmentos que o usuário pode alterar
+            for (const linha of linhas) {
+                desenharLinha(linha);
+            }
         }
 
         function desenharLinha(linha) {
+            // Se estiver finalizado e a linha for inativa (azul claro), não desenha
+            if (etapa === "finalizado" && !linha.ativa) {
+                return;
+            }
+            
             const x = casa.x + linha.col * bw;
             const y = casa.y + linha.lin * bh;
 
