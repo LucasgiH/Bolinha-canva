@@ -123,7 +123,7 @@
             ctx.strokeRect(casa.x, casa.y, casa.largura, casa.altura);
 
             // Aberturas na borda
-            ctx.strokeStyle = "white";
+            /*ctx.strokeStyle = "white";
             ctx.lineWidth = 10;
 
             for (const abertura of aberturas) {
@@ -139,6 +139,35 @@
                 }
 
                 ctx.stroke();
+            }*/
+            
+            // Desenha a entrada e a saída
+            for (let i = 0; i < aberturas.length; i++) {
+                const abertura = aberturas[i];
+
+                if (i === 0) {
+                    // Primeira abertura: entrada totalmente branca
+                    ctx.strokeStyle = "white";
+                    ctx.lineWidth = 10;
+                    ctx.beginPath();
+
+                    if (
+                        abertura.lado === "superior" ||
+                        abertura.lado === "inferior"
+                    ) {
+                        ctx.moveTo(abertura.x - 18, abertura.y);
+                        ctx.lineTo(abertura.x + 18, abertura.y);
+                    } else {
+                        ctx.moveTo(abertura.x, abertura.y - 18);
+                        ctx.lineTo(abertura.x, abertura.y + 18);
+                    }
+
+                    ctx.stroke();
+
+                } else {
+                    // Segunda abertura: saída quadriculada
+                    desenharSaidaQuadriculada(abertura);
+                }
             }
 
             // A grade interna só aparece na etapa de edição
@@ -157,6 +186,59 @@
                 ctx.textBaseline = "middle";
                 ctx.fillText("OK", botaoX + larguraBotao / 2,
                     botaoY + alturaBotao / 2);
+            }
+        }
+        
+        // Desenha a saída com pequenos quadrados pretos e brancos
+        function desenharSaidaQuadriculada(abertura) {
+            const tamanho = 6;
+
+            ctx.fillStyle = "white";
+
+            if (
+                abertura.lado === "superior" ||
+                abertura.lado === "inferior"
+            ) {
+                // Retângulo horizontal: 6 colunas x 2 linhas
+                const inicioX = abertura.x - 18;
+                const inicioY = abertura.y - 5;
+
+                for (let linha = 0; linha < 2; linha++) {
+                    for (let coluna = 0; coluna < 6; coluna++) {
+                        ctx.fillStyle =
+                            (linha + coluna) % 2 === 0
+                                ? "black"
+                                : "white";
+
+                        ctx.fillRect(
+                            inicioX + coluna * tamanho,
+                            inicioY + linha * 5,
+                            tamanho,
+                            5
+                        );
+                    }
+                }
+
+            } else {
+                // Retângulo vertical: 2 colunas x 6 linhas
+                const inicioX = abertura.x - 5;
+                const inicioY = abertura.y - 18;
+
+                for (let linha = 0; linha < 6; linha++) {
+                    for (let coluna = 0; coluna < 2; coluna++) {
+                        ctx.fillStyle =
+                            (linha + coluna) % 2 === 0
+                                ? "black"
+                                : "white";
+
+                        ctx.fillRect(
+                            inicioX + coluna * 5,
+                            inicioY + linha * tamanho,
+                            5,
+                            tamanho
+                        );
+                    }
+                }
             }
         }
 
