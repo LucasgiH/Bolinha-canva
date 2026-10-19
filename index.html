@@ -60,10 +60,17 @@
         let aberturas = [];
         let mostrarBotao = false;
         let caminhoExiste = false;
-        
+
         // Bolinha vermelha que representa o personagem
         let bolinha = null;
         const raioBolinha = 20;
+
+        // bolinha vermelha Tremaux: contador de travessias de cada passagem
+        let contadores = new Map();
+        // bolinha vermelha Tremaux: controle do movimento automático
+        let temporizadorBolinha = null;
+        let passosBolinha = 0;
+        const intervaloBolinha = 500; // milissegundos entre cada passo
 
         // Cada linha tem uma posição na grade e um estado.
         // ativa = true: azul escuro, parede fechada.
@@ -126,25 +133,6 @@
             ctx.lineWidth = 6;
             ctx.strokeRect(casa.x, casa.y, casa.largura, casa.altura);
 
-            // Aberturas na borda
-            /*ctx.strokeStyle = "white";
-            ctx.lineWidth = 10;
-
-            for (const abertura of aberturas) {
-                ctx.beginPath();
-
-                if (abertura.lado === "superior" ||
-                    abertura.lado === "inferior") {
-                    ctx.moveTo(abertura.x - 18, abertura.y);
-                    ctx.lineTo(abertura.x + 18, abertura.y);
-                } else {
-                    ctx.moveTo(abertura.x, abertura.y - 18);
-                    ctx.lineTo(abertura.x, abertura.y + 18);
-                }
-
-                ctx.stroke();
-            }*/
-            
             // Desenha a entrada e a saída
             for (let i = 0; i < aberturas.length; i++) {
                 const abertura = aberturas[i];
@@ -169,7 +157,7 @@
                     ctx.stroke();
 
                 } else {
-                    // Segunda abertura: saída quadriculada
+                    // Segunda abertura: saída
                     desenharSaidaQuadriculada(abertura);
                 }
             }
@@ -178,7 +166,7 @@
             if (etapa !== "aberturas") {
                 desenharGrade();
             }
-            
+
             // Mostra a bolinha depois que o labirinto for finalizado
             if (etapa === "finalizado") {
                 desenharBolinha();
@@ -197,92 +185,33 @@
                     botaoY + alturaBotao / 2);
             }
         }
-        
-        // Desenha a saída com pequenos quadrados pretos e brancos
-        function desenharSaidaQuadriculada(abertura) {
-            const tamanho = 6;
 
-            ctx.fillStyle = "white";
+        function desenharSaidaQuadriculada(abertura) {
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 10;
+
+            ctx.beginPath();
 
             if (
                 abertura.lado === "superior" ||
                 abertura.lado === "inferior"
             ) {
-                // Retângulo horizontal: 6 colunas x 2 linhas
-                const inicioX = abertura.x - 18;
-                const inicioY = abertura.y - 5;
-
-                for (let linha = 0; linha < 2; linha++) {
-                    for (let coluna = 0; coluna < 6; coluna++) {
-                        ctx.fillStyle =
-                            (linha + coluna) % 2 === 0
-                                ? "black"
-                                : "white";
-
-                        ctx.fillRect(
-                            inicioX + coluna * tamanho,
-                            inicioY + linha * 5,
-                            tamanho,
-                            5
-                        );
-                    }
-                }
-
+                ctx.moveTo(abertura.x - 18, abertura.y);
+                ctx.lineTo(abertura.x + 18, abertura.y);
             } else {
-                // Retângulo vertical: 2 colunas x 6 linhas
-                const inicioX = abertura.x - 5;
-                const inicioY = abertura.y - 18;
-
-                for (let linha = 0; linha < 6; linha++) {
-                    for (let coluna = 0; coluna < 2; coluna++) {
-                        ctx.fillStyle =
-                            (linha + coluna) % 2 === 0
-                                ? "black"
-                                : "white";
-
-                        ctx.fillRect(
-                            inicioX + coluna * 5,
-                            inicioY + linha * tamanho,
-                            5,
-                            tamanho
-                        );
-                    }
-                }
+                ctx.moveTo(abertura.x, abertura.y - 18);
+                ctx.lineTo(abertura.x, abertura.y + 18);
             }
+
+            ctx.stroke();
         }
 
-        /*function desenharGrade() {
-            // Linhas claras de base
-            ctx.strokeStyle = azulClaro;
-            ctx.lineWidth = 2;
-
-            for (let i = 1; i < colunas; i++) {
-                const x = casa.x + i * bw;
-                ctx.beginPath();
-                ctx.moveTo(x, casa.y);
-                ctx.lineTo(x, casa.y + casa.altura);
-                ctx.stroke();
-            }
-
-            for (let i = 1; i < linhasDeCelulas; i++) {
-                const y = casa.y + i * bh;
-                ctx.beginPath();
-                ctx.moveTo(casa.x, y);
-                ctx.lineTo(casa.x + casa.largura, y);
-                ctx.stroke();
-            }
-
-            // Segmentos que o usuário pode alterar
-            for (const linha of linhas) {
-                desenharLinha(linha);
-            }
-        }*/
         function desenharGrade() {
             // Linhas claras de base (só desenha se NÃO estiver finalizado)
             if (etapa !== "finalizado") {
                 ctx.strokeStyle = azulClaro;
                 ctx.lineWidth = 2;
-        
+
                 for (let i = 1; i < colunas; i++) {
                     const x = casa.x + i * bw;
                     ctx.beginPath();
@@ -290,7 +219,7 @@
                     ctx.lineTo(x, casa.y + casa.altura);
                     ctx.stroke();
                 }
-        
+
                 for (let i = 1; i < linhasDeCelulas; i++) {
                     const y = casa.y + i * bh;
                     ctx.beginPath();
@@ -299,7 +228,7 @@
                     ctx.stroke();
                 }
             }
-        
+
             // Segmentos que o usuário pode alterar
             for (const linha of linhas) {
                 desenharLinha(linha);
@@ -311,7 +240,7 @@
             if (etapa === "finalizado" && !linha.ativa) {
                 return;
             }
-            
+
             const x = casa.x + linha.col * bw;
             const y = casa.y + linha.lin * bh;
 
@@ -328,13 +257,21 @@
             ctx.lineWidth = 4;
             ctx.stroke();
         }
-        
+
         // Desenha a bolinha vermelha no centro de uma célula
         function desenharBolinha() {
             if (bolinha === null) return;
 
-            const x = casa.x + bolinha.col * bw + bw / 2;
-            const y = casa.y + bolinha.lin * bh + bh / 2;
+            // bolinha vermelha Tremaux: ao atravessar a saída, a bolinha
+            // é desenhada em cima da abertura de saída
+            let x, y;
+            if (bolinha.saiu) {
+                x = aberturas[1].x;
+                y = aberturas[1].y;
+            } else {
+                x = casa.x + bolinha.col * bw + bw / 2;
+                y = casa.y + bolinha.lin * bh + bh / 2;
+            }
 
             ctx.beginPath();
             ctx.arc(x, y, raioBolinha, 0, Math.PI * 2);
@@ -505,6 +442,116 @@
         }
 
         // ==================================================
+        // 6B. bolinha vermelha Tremaux: MOVIMENTO DA BOLINHA
+        // ==================================================
+
+        // bolinha vermelha Tremaux: identifica a passagem entre duas
+        // células vizinhas (mesma linha usada em passagemLivre)
+        function chavePassagem(col1, lin1, col2, lin2) {
+            if (col1 === col2) {
+                return "h," + col1 + "," + Math.max(lin1, lin2);
+            }
+            return "v," + Math.max(col1, col2) + "," + lin1;
+        }
+
+        // bolinha vermelha Tremaux: lê os quatro lados da célula atual.
+        // Paredes, perímetro e a abertura de entrada são descartados.
+        // Só restam as passagens azul claro e, se estiver na célula
+        // da saída, a própria saída.
+        function opcoesDaBolinha() {
+            const opcoes = [];
+            const celulaSaida = celulaDaAbertura(aberturas[1]);
+            const direcoes = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+
+            for (const [dc, dl] of direcoes) {
+                const col = bolinha.col + dc;
+                const lin = bolinha.lin + dl;
+
+                // Fora da grade = perímetro = parede
+                if (col < 0 || col >= colunas ||
+                    lin < 0 || lin >= linhasDeCelulas) {
+                    continue;
+                }
+
+                // Linha azul escuro = parede
+                if (!passagemLivre(bolinha.col, bolinha.lin, col, lin)) {
+                    continue;
+                }
+
+                opcoes.push({
+                    saida: false,
+                    col,
+                    lin,
+                    chave: chavePassagem(bolinha.col, bolinha.lin, col, lin)
+                });
+            }
+
+            if (bolinha.col === celulaSaida.col &&
+                bolinha.lin === celulaSaida.lin) {
+                opcoes.push({ saida: true, chave: "saida" });
+            }
+
+            return opcoes;
+        }
+
+        // bolinha vermelha Tremaux: fica só com as opções de menor
+        // contador e sorteia entre elas
+        function escolherOpcao(opcoes) {
+            let menor = Infinity;
+            for (const opcao of opcoes) {
+                menor = Math.min(menor, contadores.get(opcao.chave) || 0);
+            }
+
+            const empatadas = opcoes.filter(
+                opcao => (contadores.get(opcao.chave) || 0) === menor
+            );
+
+            return empatadas[Math.floor(Math.random() * empatadas.length)];
+        }
+
+        // bolinha vermelha Tremaux: um passo da bolinha
+        function passoDaBolinha() {
+            const opcoes = opcoesDaBolinha();
+
+            // Segurança: a validação impede este caso
+            if (opcoes.length === 0) {
+                clearInterval(temporizadorBolinha);
+                mensagem.textContent = "A bolinha ficou sem opções.";
+                return;
+            }
+
+            const escolhida = escolherOpcao(opcoes);
+            passosBolinha++;
+
+            // Atravessou a saída: termina e zera os contadores
+            if (escolhida.saida) {
+                clearInterval(temporizadorBolinha);
+                bolinha.saiu = true;
+                contadores = new Map();
+                mensagem.textContent =
+                    "A bolinha encontrou a saída em " + passosBolinha + " passos!";
+                desenhar();
+                return;
+            }
+
+            // Atravessou uma passagem livre: soma 1 no contador dela
+            contadores.set(
+                escolhida.chave,
+                (contadores.get(escolhida.chave) || 0) + 1
+            );
+
+            bolinha = { col: escolhida.col, lin: escolhida.lin };
+            desenhar();
+        }
+
+        // bolinha vermelha Tremaux: inicia o movimento automático
+        function iniciarMovimentoBolinha() {
+            contadores = new Map();
+            passosBolinha = 0;
+            temporizadorBolinha = setInterval(passoDaBolinha, intervaloBolinha);
+        }
+
+        // ==================================================
         // 7. CLIQUES NO CANVAS
         // ==================================================
 
@@ -592,10 +639,14 @@
                     etapa = "finalizado";
                     mostrarBotao = false;
 
+                    // bolinha vermelha Tremaux: mensagem atualizada
                     mensagem.textContent =
-                        "Labirinto finalizado! O cenário está bloqueado.";
+                        "Labirinto finalizado! A bolinha procura a saída.";
 
                     desenhar();
+
+                    // bolinha vermelha Tremaux: começa a se mover sozinha
+                    iniciarMovimentoBolinha();
                     return;
                 }
 
