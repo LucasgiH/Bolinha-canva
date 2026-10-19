@@ -60,6 +60,10 @@
         let aberturas = [];
         let mostrarBotao = false;
         let caminhoExiste = false;
+        
+        // Bolinha vermelha que representa o personagem
+        let bolinha = null;
+        const raioBolinha = 20;
 
         // Cada linha tem uma posição na grade e um estado.
         // ativa = true: azul escuro, parede fechada.
@@ -173,6 +177,11 @@
             // A grade interna só aparece na etapa de edição
             if (etapa !== "aberturas") {
                 desenharGrade();
+            }
+            
+            // Mostra a bolinha depois que o labirinto for finalizado
+            if (etapa === "finalizado") {
+                desenharBolinha();
             }
 
             // O botão aparece conforme a etapa e a validação
@@ -318,6 +327,19 @@
             ctx.strokeStyle = linha.ativa ? azulEscuro : azulClaro;
             ctx.lineWidth = 4;
             ctx.stroke();
+        }
+        
+        // Desenha a bolinha vermelha no centro de uma célula
+        function desenharBolinha() {
+            if (bolinha === null) return;
+
+            const x = casa.x + bolinha.col * bw + bw / 2;
+            const y = casa.y + bolinha.lin * bh + bh / 2;
+
+            ctx.beginPath();
+            ctx.arc(x, y, raioBolinha, 0, Math.PI * 2);
+            ctx.fillStyle = "red";
+            ctx.fill();
         }
 
         // ==================================================
@@ -563,10 +585,16 @@
             // Etapa 2: editar linhas e validar depois de cada alteração.
             if (etapa === "labirinto") {
                 if (mostrarBotao && clicouNoBotao(x, y)) {
+                    // Posiciona a bolinha na célula da entrada
+                    bolinha = celulaDaAbertura(aberturas[0]);
+
+                    // Finaliza e bloqueia o labirinto
                     etapa = "finalizado";
                     mostrarBotao = false;
+
                     mensagem.textContent =
                         "Labirinto finalizado! O cenário está bloqueado.";
+
                     desenhar();
                     return;
                 }
