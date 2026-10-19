@@ -633,12 +633,12 @@
                 // O botão alterna entre 5x5 e 3x4.
                 // Enquanto estiver nesta etapa, as aberturas ficam bloqueadas.
                 if (clicouNoBotao(x, y)) {
-                    modoGrade = modoGrade === "5x5" ? "3x4" : "5x5";
-            
                     mensagem.textContent =
                         "Modo selecionado: " + modoGrade +
                         ". A escolha das aberturas continua bloqueada.";
-            
+                
+                    modoGrade = modoGrade === "5x5" ? "3x4" : "5x5";
+                
                     desenhar();
                     return;
                 }
