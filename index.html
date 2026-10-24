@@ -78,7 +78,7 @@
         function sortearEstado() {
             return Math.random() < 0.5;
         }
-
+        /*
         function criarLinha(tipo, col, lin) {
             return {
                 tipo,
@@ -86,8 +86,19 @@
                 lin,
                 ativa: sortearEstado()
             };
+        }*/
+        function criarLinha(tipo, col, lin) {
+            return {
+                tipo,
+                col,
+                lin,
+                ativa: sortearEstado(),
+                vermelha: false,
+                corAnterior: null,
+                cliquesEspeciais: 0
+            };
         }
-
+        
         // ==================================================
         // 3. AS 17 LINHAS INTERATIVAS
         // ==================================================
@@ -120,6 +131,8 @@
             criarLinha("v", 2, 2),
             criarLinha("v", 3, 2)
         ];
+        
+        const indiceLinhaEspecial = 0;
 
         // ==================================================
         // 4. DESENHO
@@ -252,8 +265,16 @@
             } else {
                 ctx.lineTo(x, y + bh);
             }
-
+            /*
             ctx.strokeStyle = linha.ativa ? azulEscuro : azulClaro;
+            ctx.lineWidth = 4;
+            ctx.stroke();*/
+            if (linha.vermelha && etapa === "labirinto") {
+                ctx.strokeStyle = "red";
+            } else {
+                ctx.strokeStyle = linha.ativa ? azulEscuro : azulClaro;
+            }
+            
             ctx.lineWidth = 4;
             ctx.stroke();
         }
@@ -651,11 +672,55 @@
                 }
 
                 // Verifica da última linha desenhada para a primeira.
-                for (let i = linhas.length - 1; i >= 0; i--) {
+                /*for (let i = linhas.length - 1; i >= 0; i--) {
                     const linha = linhas[i];
 
                     if (clicouNaLinha(x, y, linha)) {
                         linha.ativa = !linha.ativa;
+                        atualizarValidacao();
+                        return;
+                    }
+                }*/
+                // Verifica da última linha desenhada para a primeira.
+                for (let i = linhas.length - 1; i >= 0; i--) {
+                    const linha = linhas[i];
+                
+                    if (clicouNaLinha(x, y, linha)) {
+                
+                        // Linha especial: permite três estados de interação.
+                        if (i === indiceLinhaEspecial) {
+                
+                            // Se estiver vermelha, volta à cor oposta
+                            // daquela que tinha antes de ficar vermelha.
+                            if (linha.vermelha) {
+                                linha.ativa = !linha.corAnterior;
+                                linha.vermelha = false;
+                                linha.corAnterior = null;
+                                linha.cliquesEspeciais = 0;
+                
+                            } else if (linha.cliquesEspeciais === 0) {
+                
+                                // Primeiro clique: alterna entre azul escuro
+                                // e azul claro.
+                                linha.ativa = !linha.ativa;
+                                linha.cliquesEspeciais = 1;
+                
+                            } else {
+                
+                                // Segundo clique: guarda a cor atual
+                                // e transforma a linha em vermelha.
+                                linha.corAnterior = linha.ativa;
+                                linha.vermelha = true;
+                                linha.cliquesEspeciais = 2;
+                            }
+                
+                        } else {
+                
+                            // As outras 16 linhas continuam funcionando
+                            // normalmente, alternando entre as duas cores.
+                            linha.ativa = !linha.ativa;
+                        }
+                
                         atualizarValidacao();
                         return;
                     }
